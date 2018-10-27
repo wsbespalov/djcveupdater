@@ -30,6 +30,12 @@ urlpatterns += [
     path('', RedirectView.as_view(url='/main/', permanent=True))
 ]
 
+# Stats routes
+
+urlpatterns += [
+    path('stats/', include('stats.urls')),
+]
+
 # Main app routes
 
 urlpatterns += [

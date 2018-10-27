@@ -15,6 +15,14 @@ logger = logging.getLogger(__name__)
 
 class CPEController(object):
 
+    def stats(self):
+        return dict(
+            count_before=VULNERABILITY_CPE.objects.count(),
+            count_after=VULNERABILITY_CPE.objects.count(),
+            status="ok",
+            message="ok"
+        )
+
     def update(self):
         count_before = count_after = VULNERABILITY_CPE.objects.count()
         parser = make_parser()
@@ -35,7 +43,7 @@ class CPEController(object):
         if f is not None:
             logger.info('parse data')
             parser.parse(f)
-            for cpe in ch.cpe[:10]:
+            for cpe in ch.cpe:
                 x = dict()
                 x['id'] = to_string_formatted_cpe(cpe['name'])
                 x['title'] = cpe['title'][0]

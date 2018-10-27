@@ -12,7 +12,9 @@ def home(request):
 def update(request):
     cpe_controller = CPEController()
     result = cpe_controller.update()
-    return HttpResponse('updater_cpe/update + {}'.format(result))
+    return HttpResponse('updater_cpe/update -> {}'.format(result))
 
 def stats(request):
-    return HttpResponse('updater/stats')
+    cpe_controller = CPEController()
+    result = cpe_controller.stats()
+    return HttpResponse('updater/stats -> {}'.format(result))

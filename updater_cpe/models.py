@@ -6,6 +6,8 @@ from django.db import models
 
 # Create your models here.
 
+from django.utils import timezone
+
 from django.contrib.postgres.fields import ArrayField
 from django.core import serializers
 
@@ -15,6 +17,7 @@ class VULNERABILITY_CPE(models.Model):
     title = models.TextField(default="")
     cpe_2_2 = models.TextField(default="")
     references = ArrayField(models.TextField(blank=True), default=list)
+    created = models.DateTimeField(default=timezone.now)
 
     objects = models.Manager()
 
