@@ -13,7 +13,7 @@ from django.core import serializers
 
 
 class VULNERABILITY_CPE(models.Model):
-    cpe_id = models.TextField(default="")
+    cpe_id = models.TextField(unique=True)
     title = models.TextField(default="")
     cpe_2_2 = models.TextField(default="")
     references = ArrayField(models.TextField(blank=True), default=list)
@@ -46,3 +46,17 @@ class VULNERABILITY_CPE(models.Model):
         data["cpe_2_2"] = self.cpe_2_2
         data["references"] = self.references
         return data
+
+
+class VULNERABILITY_CPE_NEW(VULNERABILITY_CPE):
+    class Meta:
+        ordering = ["cpe_id"]
+        verbose_name = "VULNERABILITY_CPE_NEW"
+        verbose_name_plural = "VULNERABILITY_CPE_NEWS"
+
+
+class VULNERABILITY_CPE_MODIFIED(VULNERABILITY_CPE):
+    class Meta:
+        ordering = ["cpe_id"]
+        verbose_name = "VULNERABILITY_CPE_MODIFIED"
+        verbose_name_plural = "VULNERABILITY_CPE_MODIFIEDS"
