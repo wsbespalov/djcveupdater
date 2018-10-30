@@ -17,4 +17,4 @@ def update(request):
 def stats(request):
     cpe_controller = CPEController()
     result = cpe_controller.stats()
-    return HttpResponse('updater/stats -> {}'.format(result))
+    return HttpResponse('updater_cpe/stats -> {}'.format(result))

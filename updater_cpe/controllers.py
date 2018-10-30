@@ -34,6 +34,7 @@ def pack_answer(
         message=message
     )
 
+
 class CPEController(object):
 
     @staticmethod

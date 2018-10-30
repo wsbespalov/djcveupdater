@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'stats',
-    'updater_cpe'
+    'updater_cpe',
+    'updater_cwe'
 ]
 
 MIDDLEWARE = [
