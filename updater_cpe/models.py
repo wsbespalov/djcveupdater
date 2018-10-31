@@ -36,7 +36,7 @@ class VULNERABILITY_CPE(models.Model):
         return super(self.__class__, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        super(VULNERABILITY_CPE, self).save(*args, **kwargs)
+        super(self.__class__, self).save(*args, **kwargs)
 
     @property
     def data(self):
@@ -52,11 +52,11 @@ class VULNERABILITY_CPE_NEW(VULNERABILITY_CPE):
     class Meta:
         ordering = ["cpe_id"]
         verbose_name = "VULNERABILITY_CPE_NEW"
-        verbose_name_plural = "VULNERABILITY_CPE_NEWS"
+        verbose_name_plural = "VULNERABILITY_CPES_NEW"
 
 
 class VULNERABILITY_CPE_MODIFIED(VULNERABILITY_CPE):
     class Meta:
         ordering = ["cpe_id"]
         verbose_name = "VULNERABILITY_CPE_MODIFIED"
-        verbose_name_plural = "VULNERABILITY_CPE_MODIFIEDS"
+        verbose_name_plural = "VULNERABILITY_CPES_MODIFIED"
