@@ -4,8 +4,6 @@ import json
 
 from django.db import models
 
-# Create your models here.
-
 from django.utils import timezone
 
 from django.contrib.postgres.fields import ArrayField
@@ -41,6 +39,7 @@ class VULNERABILITY_CPE(models.Model):
         data["component"] = self.component
         data["version"] = self.version
         data["vendor"] = self.vendor
+        data["created"] = self.created
         return data
 
     class Meta:
@@ -78,6 +77,7 @@ class VULNERABILITY_CPE_NEW(models.Model):
         data["component"] = self.component
         data["version"] = self.version
         data["vendor"] = self.vendor
+        data["created"] = self.created
         return data
 
     class Meta:
@@ -115,6 +115,7 @@ class VULNERABILITY_CPE_MODIFIED(models.Model):
         data["component"] = self.component
         data["version"] = self.version
         data["vendor"] = self.vendor
+        data["created"] = self.created
         return data
 
     class Meta:

@@ -19,7 +19,7 @@ def time_string_to_datetime(time_string):
 
 
 def unquote(cpe):
-    return re.compile('%([0-9a-fA-F]{2})',re.M).sub(lambda m: "\\" + chr(int(m.group(1),16)), cpe)
+    return re.compile('%([0-9a-fA-F]{2})', re.M).sub(lambda m: "\\" + chr(int(m.group(1),16)), cpe)
 
 
 def to_string_formatted_cpe(cpe, autofill=False):
@@ -99,12 +99,14 @@ def read_file(getfile, fmt='gzip', unpack=True):
                         print('read gzip file')
                         data = fp.read()
                         print(len(data))
-                if fmt == 'bzip2':
+                        return data, True, 'gzip opened'
+                elif fmt == 'bzip2':
                     print('read bzip2 file')
                     zfile = bz2.BZ2File(getfile)
                     data = BytesIO(zfile.read())
                     print(len(data))
-                if fmt == 'zip':
+                    return data, True, 'bzip2 opened'
+                elif fmt == 'zip':
                     print('read zip file')
                     unzipped_file = []
                     zfile = zipfile.ZipFile(getfile, 'r')
@@ -115,5 +117,9 @@ def read_file(getfile, fmt='gzip', unpack=True):
                     print(len(unzipped_file))
                     if len(unzipped_file) > 0:
                         data = BytesIO(unzipped_file[0].read())
-            return data, True
-    return None, False
+                        return data, True, 'zip opened'
+                    return None, False, 'zip archive is empty'
+            with open(getfile, 'rb') as fp:
+                data = BytesIO(fp.read())
+            return data, True, 'raw file opened'
+    return None, False, 'error with file read or unpack'

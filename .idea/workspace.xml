@@ -2,7 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a5270131-58c0-48ac-97e2-fb4e59a2d915" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/updater_capec/configurations.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/updater_capec/controllers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/updater_capec/handlers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/updater_capec/text_messages.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/updater_capec/urls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/updater_capec/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cveupdater/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/cveupdater/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cveupdater/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/cveupdater/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_cpe/controllers.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_cpe/controllers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_cpe/handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_cpe/handlers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_cpe/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_cpe/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_cpe/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_cpe/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_cwe/controllers.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_cwe/controllers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_cwe/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_cwe/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_cwe/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_cwe/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,7 +26,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/djcveupdater$runserver.coverage" NAME="runserver Coverage Results" MODIFIED="1541082174031" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/djcveupdater$runserver.coverage" NAME="runserver Coverage Results" MODIFIED="1541175082812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/djcveupdater$0001_initial.coverage" NAME="0001_initial Coverage Results" MODIFIED="1540644216184" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
@@ -56,43 +71,44 @@
     <session id="224526871">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="7" />
+          <entry key="project.closed" value="9" />
           <entry key="project.open.time.101" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.38" value="1" />
+          <entry key="project.open.time.39" value="1" />
           <entry key="project.open.time.44" value="1" />
           <entry key="project.open.time.6" value="2" />
           <entry key="project.open.time.64" value="1" />
           <entry key="project.open.time.7" value="1" />
-          <entry key="project.opened" value="8" />
+          <entry key="project.opened" value="9" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="gitignore" value="1" />
-          <entry key="py" value="70" />
+          <entry key="py" value="108" />
           <entry key="xml" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="70" />
+          <entry key="Python" value="108" />
           <entry key="XML" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="dummy" value="1" />
+          <entry key="dummy" value="13" />
           <entry key="gitignore" value="13" />
-          <entry key="py" value="10185" />
+          <entry key="py" value="12925" />
           <entry key="txt" value="98" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="112" />
-          <entry key="Python" value="10185" />
+          <entry key="PLAIN_TEXT" value="124" />
+          <entry key="Python" value="12925" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.js.language.service.starts" />
@@ -103,25 +119,42 @@
     <favorites_list name="djcveupdater" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.52274144">
+    <splitter split-orientation="horizontal" split-proportion="0.6495238">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/updater_cpe/controllers.py">
+            <entry file="file://$PROJECT_DIR$/updater_capec/models.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="357">
-                  <caret line="17" column="36" lean-forward="true" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+                <state relative-caret-position="612">
+                  <caret line="110" column="33" selection-start-line="110" selection-start-column="33" selection-end-line="110" selection-end-column="33" />
+                  <folding>
+                    <element signature="e#0#39#0" expanded="true" />
+                    <marker date="1541175345406" expanded="true" signature="295:296" ph="..." />
+                    <marker date="1541175345406" expanded="true" signature="295:297" ph="..." />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/updater_capec/controllers.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="497">
+                  <caret line="103" column="24" selection-start-line="103" selection-start-column="24" selection-end-line="103" selection-end-column="24" />
                   <folding>
                     <element signature="e#0#31#0" expanded="true" />
-                    <marker date="1541153642280" expanded="true" signature="458:508" ph="..." />
-                    <marker date="1541153642280" expanded="true" signature="703:1015" ph="..." />
-                    <marker date="1541153642280" expanded="true" signature="1501:1507" ph="..." />
-                    <marker date="1541153642280" expanded="true" signature="1925:2243" ph="..." />
-                    <marker date="1541153642280" expanded="true" signature="2425:2803" ph="..." />
-                    <marker date="1541153642280" expanded="true" signature="2878:3378" ph="..." />
-                    <marker date="1541153642280" expanded="true" signature="3801:8058" ph="..." />
-                    <marker date="1541153642280" expanded="true" signature="8769:8774" ph="..." />
+                    <marker date="1541175207474" expanded="true" signature="2916:3210" ph="..." />
+                    <marker date="1541175207474" expanded="true" signature="3207:3208" ph="..." />
                   </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/updater_capec/configurations.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="168">
+                  <caret line="8" column="27" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
                 </state>
               </provider>
             </entry>
@@ -129,24 +162,31 @@
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/updater_cwe/controllers.py">
+            <entry file="file://$PROJECT_DIR$/updater_cpe/controllers.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="489">
-                  <caret line="143" column="28" selection-start-line="143" selection-start-column="28" selection-end-line="143" selection-end-column="28" />
+                <state relative-caret-position="216">
+                  <caret line="289" column="40" selection-start-line="289" selection-start-column="12" selection-end-line="289" selection-end-column="40" />
                   <folding>
                     <element signature="e#0#31#0" expanded="true" />
+                    <marker date="1541174687020" expanded="true" signature="458:508" ph="..." />
+                    <marker date="1541174687020" expanded="true" signature="703:1015" ph="..." />
+                    <marker date="1541174687020" expanded="true" signature="1501:1507" ph="..." />
+                    <marker date="1541174687020" expanded="true" signature="1925:2243" ph="..." />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/.gitignore">
+            <entry file="file://$PROJECT_DIR$/updater_cwe/controllers.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="189">
-                  <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
+                <state relative-caret-position="409">
+                  <caret line="151" selection-start-line="151" selection-end-line="151" />
+                  <folding>
+                    <element signature="e#0#31#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -165,6 +205,8 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>context</find>
+      <find>append_capec_in_vulnerability_capec_table</find>
+      <find>cpe</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -181,7 +223,6 @@
         <option value="$PROJECT_DIR$/updater_cpe/utils/__init__.py" />
         <option value="$PROJECT_DIR$/updater_cpe/utils/to_string_formatted_cpe.py" />
         <option value="$PROJECT_DIR$/updater_cpe/handlers/handler_cpe.py" />
-        <option value="$PROJECT_DIR$/updater_cpe/handlers.py" />
         <option value="$PROJECT_DIR$/updater_cpe/config/config.py" />
         <option value="$PROJECT_DIR$/updater_cpe/config.py" />
         <option value="$PROJECT_DIR$/NOTES.md" />
@@ -193,18 +234,27 @@
         <option value="$PROJECT_DIR$/updater_cwe/views.py" />
         <option value="$PROJECT_DIR$/updater_cwe/urls.py" />
         <option value="$PROJECT_DIR$/updater_cwe/handlers.py" />
-        <option value="$PROJECT_DIR$/cveupdater/settings.py" />
-        <option value="$PROJECT_DIR$/cveupdater/urls.py" />
-        <option value="$PROJECT_DIR$/updater_cpe/models.py" />
-        <option value="$PROJECT_DIR$/updater_cpe/utils.py" />
         <option value="$PROJECT_DIR$/updater_cwe/text_messages.py" />
         <option value="$PROJECT_DIR$/updater_cpe/configurations.py" />
-        <option value="$PROJECT_DIR$/updater_cpe/controllers.py" />
-        <option value="$PROJECT_DIR$/updater_cwe/utils.py" />
         <option value="$PROJECT_DIR$/updater_cwe/configurations.py" />
-        <option value="$PROJECT_DIR$/updater_cwe/controllers.py" />
-        <option value="$PROJECT_DIR$/updater_cwe/models.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/cveupdater/urls.py" />
+        <option value="$PROJECT_DIR$/updater_capec/urls.py" />
+        <option value="$PROJECT_DIR$/updater_capec/views.py" />
+        <option value="$PROJECT_DIR$/updater_capec/text_messages.py" />
+        <option value="$PROJECT_DIR$/updater_cwe/models.py" />
+        <option value="$PROJECT_DIR$/updater_cpe/models.py" />
+        <option value="$PROJECT_DIR$/cveupdater/settings.py" />
+        <option value="$PROJECT_DIR$/updater_capec/handlers.py" />
+        <option value="$PROJECT_DIR$/updater_cpe/handlers.py" />
+        <option value="$PROJECT_DIR$/updater_capec/configurations.py" />
+        <option value="$PROJECT_DIR$/updater_cpe/controllers.py" />
+        <option value="$PROJECT_DIR$/updater_cwe/controllers.py" />
+        <option value="$PROJECT_DIR$/updater_cwe/utils.py" />
+        <option value="$PROJECT_DIR$/updater_cpe/utils.py" />
+        <option value="$PROJECT_DIR$/updater_capec/utils.py" />
+        <option value="$PROJECT_DIR$/updater_capec/controllers.py" />
+        <option value="$PROJECT_DIR$/updater_capec/models.py" />
       </list>
     </option>
   </component>
@@ -242,7 +292,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -258,6 +307,11 @@
             <path>
               <item name="djcveupdater" type="b2602c69:ProjectViewProjectNode" />
               <item name="djcveupdater" type="462c0819:PsiDirectoryNode" />
+              <item name="updater_capec" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="djcveupdater" type="b2602c69:ProjectViewProjectNode" />
+              <item name="djcveupdater" type="462c0819:PsiDirectoryNode" />
               <item name="updater_cpe" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -269,13 +323,14 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Django/Jinja2 Template" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -396,11 +451,11 @@
     <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49948078" visible="true" weight="0.108333334" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49948078" visible="true" weight="0.125" />
       <window_info id="Structure" order="1" sideWeight="0.5005192" side_tool="true" weight="0.104189634" />
       <window_info id="Favorites" order="2" sideWeight="0.5005192" side_tool="true" weight="0.104189634" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3283582" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32834226" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.18250377" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39786097" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -503,13 +558,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="5" column="14" lean-forward="true" selection-start-line="5" selection-start-column="14" selection-end-line="5" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/updater_cwe/urls.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="132">
@@ -524,101 +572,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cveupdater/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="15" selection-start-line="15" selection-end-line="15" selection-end-column="70" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/media/cpe.xml">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="262">
-          <caret line="13" selection-start-line="13" selection-end-line="13" />
-          <folding>
-            <element signature="e#0#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cveupdater/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="12" selection-start-line="12" selection-end-line="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/text_messages.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="63">
-          <caret line="3" column="6" selection-start-line="3" selection-start-column="6" selection-end-line="3" selection-end-column="6" />
-          <folding>
-            <marker date="1540828164317" expanded="true" signature="44:49" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/handlers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="40" column="28" selection-start-line="40" selection-start-column="28" selection-end-line="40" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="21" column="4" selection-end-line="119" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-            <marker date="1541152252830" expanded="true" signature="388:391" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="98" lean-forward="true" selection-start-line="98" selection-end-line="98" />
-          <folding>
-            <element signature="e#0#39#0" expanded="true" />
-            <marker date="1541151195950" expanded="true" signature="237:239" ph="..." />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/updater_cwe/text_messages.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="168">
           <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/configurations.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="8" column="19" lean-forward="true" selection-start-line="8" selection-start-column="19" selection-end-line="8" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cpe/controllers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="17" column="36" lean-forward="true" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-            <marker date="1541153642280" expanded="true" signature="458:508" ph="..." />
-            <marker date="1541153642280" expanded="true" signature="703:1015" ph="..." />
-            <marker date="1541153642280" expanded="true" signature="1501:1507" ph="..." />
-            <marker date="1541153642280" expanded="true" signature="1925:2243" ph="..." />
-            <marker date="1541153642280" expanded="true" signature="2425:2803" ph="..." />
-            <marker date="1541153642280" expanded="true" signature="2878:3378" ph="..." />
-            <marker date="1541153642280" expanded="true" signature="3801:8058" ph="..." />
-            <marker date="1541153642280" expanded="true" signature="8769:8774" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -629,37 +589,230 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cveupdater/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="537">
+          <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_capec/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" column="19" lean-forward="true" selection-start-line="2" selection-start-column="19" selection-end-line="2" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="8" column="1" lean-forward="true" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="6" column="18" selection-start-line="6" selection-start-column="18" selection-end-line="6" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/text_messages.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="8" column="31" lean-forward="true" selection-start-line="8" selection-start-column="31" selection-end-line="8" selection-end-column="31" />
+          <folding>
+            <marker date="1540828164317" expanded="true" signature="44:49" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_capec/text_messages.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="5" column="19" lean-forward="true" selection-start-line="5" selection-start-column="19" selection-end-line="5" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cwe/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="13" column="9" lean-forward="true" selection-start-line="13" selection-start-column="9" selection-end-line="13" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#39#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+          <folding>
+            <marker date="1541171398609" expanded="true" signature="209:211" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cveupdater/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="30" column="21" selection-end-line="149" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/handlers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="7" column="22" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_capec/handlers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="121" column="32" selection-start-line="121" selection-start-column="32" selection-end-line="121" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_capec/configurations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="8" column="27" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/Lib/genericpath.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/configurations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="126">
+          <caret line="6" column="29" selection-start-line="6" selection-start-column="29" selection-end-line="6" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/django/core/handlers/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="123" selection-start-line="123" selection-end-line="123" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_capec/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="13" selection-start-line="13" selection-end-line="13" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/django/core/management/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="246" column="8" selection-start-line="246" selection-start-column="8" selection-end-line="246" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python3/Lib/xml/sax/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="99" column="30" lean-forward="true" selection-start-line="99" selection-start-column="30" selection-end-line="99" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/controllers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="289" column="40" selection-start-line="289" selection-start-column="12" selection-end-line="289" selection-end-column="40" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+            <marker date="1541174687020" expanded="true" signature="458:508" ph="..." />
+            <marker date="1541174687020" expanded="true" signature="703:1015" ph="..." />
+            <marker date="1541174687020" expanded="true" signature="1501:1507" ph="..." />
+            <marker date="1541174687020" expanded="true" signature="1925:2243" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_cpe/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="671">
+          <caret line="122" column="41" selection-start-line="122" selection-start-column="41" selection-end-line="122" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+            <marker date="1541175155510" expanded="true" signature="388:391" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/updater_cwe/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="318">
-          <caret line="77" lean-forward="true" selection-start-line="77" selection-end-line="77" />
+        <state relative-caret-position="717">
+          <caret line="123" column="41" selection-start-line="123" selection-start-column="41" selection-end-line="123" selection-end-column="41" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cwe/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="633">
-          <caret line="111" column="44" selection-start-line="111" selection-start-column="44" selection-end-line="111" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/updater_cwe/controllers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="489">
-          <caret line="143" column="28" selection-start-line="143" selection-start-column="28" selection-end-line="143" selection-end-column="28" />
+        <state relative-caret-position="409">
+          <caret line="151" selection-start-line="151" selection-end-line="151" />
           <folding>
             <element signature="e#0#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$PROJECT_DIR$/updater_capec/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
+        <state relative-caret-position="300">
+          <caret line="103" column="63" selection-start-line="103" selection-start-column="63" selection-end-line="103" selection-end-column="63" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_capec/controllers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="497">
+          <caret line="103" column="24" selection-start-line="103" selection-start-column="24" selection-end-line="103" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#31#0" expanded="true" />
+            <marker date="1541175207474" expanded="true" signature="2916:3210" ph="..." />
+            <marker date="1541175207474" expanded="true" signature="3207:3208" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_capec/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="110" column="33" selection-start-line="110" selection-start-column="33" selection-end-line="110" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#39#0" expanded="true" />
+            <marker date="1541175345406" expanded="true" signature="295:296" ph="..." />
+            <marker date="1541175345406" expanded="true" signature="295:297" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>

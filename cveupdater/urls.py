@@ -39,3 +39,9 @@ urlpatterns += [
 urlpatterns += [
     path('cwe/', include('updater_cwe.urls'))
 ]
+
+# CAPEC
+
+urlpatterns += [
+    path('capec/', include('updater_capec.urls'))
+]
