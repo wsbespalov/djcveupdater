@@ -12,8 +12,15 @@ from .models import VULNERABILITY_CPE
 from .models import VULNERABILITY_CPE_NEW
 from .models import VULNERABILITY_CPE_MODIFIED
 
+from .configurations import CPEConfig
+
 import logging
 logger = logging.getLogger(__name__)
+
+
+def print_debug(message):
+    if CPEConfig.debug:
+        print(message)
 
 
 def pack_answer(
@@ -41,19 +48,18 @@ class CPEController(object):
 
     @staticmethod
     def clear_vulnerability_cpe_table():
-        return VULNERABILITY_CPE.objects.all().delete()
+        for x in VULNERABILITY_CPE.objects.all().iterator():
+            x.delete()
 
     @staticmethod
     def clear_vulnerability_cpe_new_table():
         for x in VULNERABILITY_CPE_NEW.objects.all().iterator():
             x.delete()
-        # return VULNERABILITY_CPE_NEW.objects.all().delete()
 
     @staticmethod
     def clear_vulnerability_cpe_modified_table():
         for x in VULNERABILITY_CPE_MODIFIED.objects.all().iterator():
             x.delete()
-        # return VULNERABILITY_CPE_MODIFIED.objects.all().delete()
 
     @staticmethod
     def count_vulnerability_cpe_table():
@@ -294,7 +300,7 @@ class CPEController(object):
             parser.parse(f)
             count = 0
             for cpe in cpe_handler.cpe:
-                print('processing: {}'.format(count))
+                print_debug('processing: {}'.format(count))
                 count += 1
                 x = dict()
                 x['cpe_id'] = to_string_formatted_cpe(cpe['name'])
@@ -310,6 +316,7 @@ class CPEController(object):
                 x['version'] = version
                 x['vendor'] = vendor
                 self.create_or_update_cpe_vulnerability(x)
+            count_after = self.count_vulnerability_cpe_table()
             return pack_answer(
                 status=TextMessages.ok.value,
                 message=TextMessages.cpe_updated.value,

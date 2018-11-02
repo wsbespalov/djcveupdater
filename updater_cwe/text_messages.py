@@ -6,6 +6,6 @@ class TextMessages(enum.Enum):
     error = "error"
     exception = "exception"
     parse_data = "parse data"
-    cpe_updated = "cwe updated"
+    cwe_updated = "cwe updated"
     download_file = "download file"
     cant_download_file = "cant get cwe file"

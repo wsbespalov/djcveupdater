@@ -1,10 +1,7 @@
 from xml.sax import make_parser
-from dateutil.parser import parse as parse_datetime
 
-from .utils import to_string_formatted_cpe
-from .utils import get_file
-
-from .configurations import CWEConfig
+from .utils import upload_file
+from .utils import read_file
 
 from .handlers import CWEHandler
 
@@ -12,10 +9,17 @@ from .models import VULNERABILITY_CWE
 from .models import VULNERABILITY_CWE_NEW
 from .models import VULNERABILITY_CWE_MODIFIED
 
+from .configurations import CWEConfig
+
 import logging
 logger = logging.getLogger(__name__)
 
 from .text_messages import TextMessages
+
+
+def print_debug(message):
+    if CWEConfig.debug:
+        print(message)
 
 
 def pack_answer(
@@ -38,19 +42,23 @@ def pack_answer(
         message=message
     )
 
+
 class CWEController(object):
 
     @staticmethod
     def clear_vulnerability_cwe_table():
-        return VULNERABILITY_CWE.objects.all().delete()
+        for x in VULNERABILITY_CWE.objects.all().iterator():
+            x.delete()
 
     @staticmethod
     def clear_vulnerability_cwe_new_table():
-        return VULNERABILITY_CWE_NEW.objects.all().delete()
+        for x in VULNERABILITY_CWE_NEW.objects.all().iterator():
+            x.delete()
 
     @staticmethod
     def clear_vulnerability_cwe_modified_table():
-        return VULNERABILITY_CWE_MODIFIED.objects.all().delete()
+        for x in VULNERABILITY_CWE_MODIFIED.objects.all().iterator():
+            x.delete()
 
     @staticmethod
     def count_vulnerability_cwe_table():
@@ -70,46 +78,41 @@ class CWEController(object):
             cwe_id=cwe['cwe_id'],
             name=cwe['name'],
             status=cwe['status'],
-            weakness=cwe['weakness'],
+            weaknesses=cwe['weaknesses'],
             description_summary=cwe['description_summary']
         )
 
     @staticmethod
     def append_cwe_in_vulnerability_cwe_new_table(cwe):
-        return VULNERABILITY_CWE_NEW.objects.create(
-            cwe_id=cwe['cwe_id'],
-            name=cwe['name'],
-            status=cwe['status'],
-            weakness=cwe['weakness'],
-            description_summary=cwe['description_summary']
-        )
+        objects = VULNERABILITY_CWE_NEW.objects.filter(cwe_id=cwe['cwe_id'])
+        if len(objects) == 0:
+            return VULNERABILITY_CWE_NEW.objects.create(
+                cwe_id=cwe['cwe_id'],
+                name=cwe['name'],
+                status=cwe['status'],
+                weaknesses=cwe['weaknesses'],
+                description_summary=cwe['description_summary']
+            )
 
     @staticmethod
     def append_cwe_in_vulnerability_cwe_modified_table(cwe):
-        return VULNERABILITY_CWE_MODIFIED.objects.create(
-            cwe_id=cwe['cwe_id'],
-            name=cwe['name'],
-            status=cwe['status'],
-            weakness=cwe['weakness'],
-            description_summary=cwe['description_summary']
-        )
+        objects = VULNERABILITY_CWE_MODIFIED.objects.filter(cwe_id=cwe['cwe_id'])
+        if len(objects) == 0:
+            return VULNERABILITY_CWE_MODIFIED.objects.create(
+                cwe_id=cwe['cwe_id'],
+                name=cwe['name'],
+                status=cwe['status'],
+                weaknesses=cwe['weaknesses'],
+                description_summary=cwe['description_summary']
+            )
 
     def create_or_update_cwe_vulnerability(self, cwe):
-        defaults = dict(
-            name=cwe['name'],
-            status=cwe['status'],
-            weakness=cwe['weakness'],
-            description_summary=cwe['description_summary']
-        )
-        cwe, created = VULNERABILITY_CWE.objects.update_or_create(
-            defaults,
-            cwe_id=cwe['cwe_id']
-        )
-        if created:
-            self.append_cwe_in_vulnerability_cwe_table(cwe.data)
-            self.append_cwe_in_vulnerability_cwe_new_table(cwe.data)
+        objects = VULNERABILITY_CWE.objects.filter(cwe_id=cwe['cwe_id'])
+        if len(objects) == 0:
+            self.append_cwe_in_vulnerability_cwe_table(cwe)
+            self.append_cwe_in_vulnerability_cwe_new_table(cwe)
         else:
-            self.append_cwe_in_vulnerability_cwe_modified_table(cwe.data)
+            self.append_cwe_in_vulnerability_cwe_modified_table(cwe)
 
     def stats(self):
         return pack_answer(
@@ -132,29 +135,37 @@ class CWEController(object):
         parser = make_parser()
         cwe_handler = CWEHandler()
         parser.setContentHandler(cwe_handler)
-        f = None
-        try:
-            logger.info(TextMessages.download_file.value)
-            logger.info('{}'.format(CWEConfig.source))
-            (f, r) = get_file(CWEConfig.source)
-        except Exception as ex:
-            return pack_answer(
-                status=TextMessages.exception.value,
-                message='{}'.format(ex),
-                cwe_cnt_before=count_before,
-                cwe_cnt_after=count_after,
-                new_cnt=0,
-                modified_cnt=0
-            )
-
-        # TODO: LAST MODIFIED
-
-        if f is not None:
+        (file_path, success, last_modified, size, fmt) = upload_file()
+        if success and file_path != '':
+            # FIXME: Make last_modified comparison
+            (f, message) = read_file(file_path, fmt=fmt)
+            if f is None:
+                return pack_answer(
+                    status=TextMessages.exception.value,
+                    message=message,
+                    cwe_cnt_before=count_before,
+                    cwe_cnt_after=count_after,
+                    new_cnt=0,
+                    modified_cnt=0
+                )
             logger.info(TextMessages.parse_data.value)
             parser.parse(f)
+            count = 0
             for cwe in cwe_handler.cwe:
+                print_debug('processing: {}'.format(count))
+                count += 1
+                cwe['cwe_id'] = 'CWE-{}'.format(cwe['id'])
                 cwe['description_summary'] = cwe['description_summary'].replace("\t\t\t\t\t", " ")
                 self.create_or_update_cwe_vulnerability(cwe)
+            count_after = self.count_vulnerability_cwe_table()
+            return pack_answer(
+                status=TextMessages.ok.value,
+                message=TextMessages.cwe_updated.value,
+                cwe_cnt_before=count_before,
+                cwe_cnt_after=count_after,
+                new_cnt=self.count_vulnerability_cwe_new_table(),
+                modified_cnt=self.count_vulnerability_cwe_modified_table()
+            )
         return pack_answer(
             status=TextMessages.error.value,
             message=TextMessages.cant_download_file.value,
@@ -163,23 +174,3 @@ class CWEController(object):
             new_cnt=0,
             modified_cnt=0
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
