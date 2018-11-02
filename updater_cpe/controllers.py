@@ -1,15 +1,8 @@
-import os
-
 from xml.sax import make_parser
-from datetime import datetime
-from dateutil.parser import parse as parse_datetime
 
 from .utils import to_string_formatted_cpe
 from .utils import upload_file
 from .utils import read_file
-from .utils import time_string_to_datetime
-
-from .configurations import CPEConfig
 
 from .text_messages import TextMessages
 
