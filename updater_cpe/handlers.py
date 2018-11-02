@@ -5,6 +5,10 @@ class CPEHandler(ContentHandler):
 
     def __init__(self):
         self.cpe = []
+        self.href = ""
+        self.title = ""
+        self.referencetitle = ""
+        self.name = ""
         self.titletag = False
         self.referencestag = False
         self.referencetag = False

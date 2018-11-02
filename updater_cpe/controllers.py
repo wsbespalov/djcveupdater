@@ -286,8 +286,8 @@ class CPEController(object):
         (file_path, success, last_modified, size, fmt) = upload_file()
         if success and file_path != '':
             # FIXME: Make last_modified comparison
-            (f, message) = read_file(file_path, fmt=fmt)
-            if f is None:
+            (f, success, message) = read_file(file_path, fmt=fmt)
+            if f is None or not success:
                 return pack_answer(
                     status=TextMessages.exception.value,
                     message=message,

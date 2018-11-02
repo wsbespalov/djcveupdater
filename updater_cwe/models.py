@@ -3,10 +3,10 @@ import json
 
 from django.db import models
 
-# Create your models here.
 from django.utils import timezone
 
 from django.core import serializers
+
 
 class VULNERABILITY_CWE(models.Model):
     cwe_id = models.TextField(unique=True)
@@ -14,6 +14,7 @@ class VULNERABILITY_CWE(models.Model):
     status = models.TextField(default="")
     weaknesses = models.TextField(default="")
     description_summary = models.TextField(default="")
+    created = models.DateTimeField(default=timezone.now)
 
     objects = models.Manager()
 
@@ -42,6 +43,7 @@ class VULNERABILITY_CWE(models.Model):
         data["status"] = self.status
         data["weaknesses"] = self.weaknesses
         data["description_summary"] = self.description_summary
+        data["created"] = self.created
         return data
 
 
@@ -51,6 +53,7 @@ class VULNERABILITY_CWE_NEW(models.Model):
     status = models.TextField(default="")
     weaknesses = models.TextField(default="")
     description_summary = models.TextField(default="")
+    created = models.DateTimeField(default=timezone.now)
 
     objects = models.Manager()
 
@@ -74,6 +77,7 @@ class VULNERABILITY_CWE_NEW(models.Model):
         data["status"] = self.status
         data["weaknesses"] = self.weaknesses
         data["description_summary"] = self.description_summary
+        data["created"] = self.created
         return data
 
     class Meta:
@@ -88,6 +92,7 @@ class VULNERABILITY_CWE_MODIFIED(models.Model):
     status = models.TextField(default="")
     weaknesses = models.TextField(default="")
     description_summary = models.TextField(default="")
+    created = models.DateTimeField(default=timezone.now)
 
     objects = models.Manager()
 
@@ -111,6 +116,7 @@ class VULNERABILITY_CWE_MODIFIED(models.Model):
         data["status"] = self.status
         data["weaknesses"] = self.weaknesses
         data["description_summary"] = self.description_summary
+        data["created"] = self.created
         return data
 
     class Meta:
