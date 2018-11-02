@@ -129,13 +129,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-DEFAULT_FILE_STORAGE=os.path.join(BASE_DIR, MEDIA_URL)
-
-CPE_MEDIA = os.path.join(MEDIA_ROOT, '/cpe/')
-CWE_MEDIA = os.path.join(MEDIA_ROOT, '/cwe/')
 
 DJANGO_LOG_LEVEL=DEBUG
 
