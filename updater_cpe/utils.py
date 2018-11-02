@@ -1,3 +1,4 @@
+import re
 import os
 import bz2
 import re
@@ -18,7 +19,7 @@ def time_string_to_datetime(time_string):
 
 
 def unquote(cpe):
-  return re.compile('%([0-9a-fA-F]{2})',re.M).sub(lambda m: "\\" + chr(int(m.group(1),16)), cpe)
+    return re.compile('%([0-9a-fA-F]{2})',re.M).sub(lambda m: "\\" + chr(int(m.group(1),16)), cpe)
 
 
 def to_string_formatted_cpe(cpe, autofill=False):
@@ -101,7 +102,6 @@ def read_file(getfile, fmt='gzip', unpack=True):
                 if fmt == 'bzip2':
                     print('read bzip2 file')
                     zfile = bz2.BZ2File(getfile)
-                    # data = zfile.read()
                     data = BytesIO(zfile.read())
                     print(len(data))
                 if fmt == 'zip':
