@@ -1,15 +1,11 @@
-import re
 import os
 import bz2
 import re
-import ssl
 import gzip
 import zipfile
 import requests
-import urllib.parse
 from io import BytesIO
 from datetime import datetime
-import urllib.request as req
 
 from .configurations import CPEConfig
 from dateutil.parser import parse as parse_datetime
@@ -26,20 +22,21 @@ def unquote(cpe):
 
 
 def to_string_formatted_cpe(cpe, autofill=False):
-    cpe=cpe.strip()
+    cpe = cpe.strip()
     if not cpe.startswith('cpe:2.3:'):
-        if not cpe.startswith('cpe:/'): return False
-        cpe=cpe.replace('cpe:/','cpe:2.3:')
-        cpe=cpe.replace('::',':-:')
-        cpe=cpe.replace('~-','~')
-        cpe=cpe.replace('~',':-:')
-        cpe=cpe.replace('::',':')
-        cpe=cpe.strip(':-')
-        cpe=unquote(cpe)
+        if not cpe.startswith('cpe:/'):
+            return False
+        cpe = cpe.replace('cpe:/','cpe:2.3:')
+        cpe = cpe.replace('::',':-:')
+        cpe = cpe.replace('~-','~')
+        cpe = cpe.replace('~',':-:')
+        cpe = cpe.replace('::',':')
+        cpe = cpe.strip(':-')
+        cpe = unquote(cpe)
     if autofill:
-        e=cpe.split(':')
+        e = cpe.split(':')
         for x in range(0,13-len(e)):
-            cpe+=':-'
+            cpe += ':-'
     return cpe
 
 
@@ -118,9 +115,5 @@ def read_file(getfile, fmt='gzip', unpack=True):
                     print(len(unzipped_file))
                     if len(unzipped_file) > 0:
                         data = BytesIO(unzipped_file[0].read())
-                        # data = unzipped_file[0].read()
-                        # if isinstance(data, bytes):
-                        #     data = data.decode('utf-8')
-                        #     print(len(data))
             return data, True
     return None, False
