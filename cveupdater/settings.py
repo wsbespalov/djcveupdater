@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'stats',
     'updater_cpe',
     'updater_cwe',
-    'updater_capec'
+    'updater_capec',
+    'updater_npm'
 ]
 
 MIDDLEWARE = [

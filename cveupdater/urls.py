@@ -45,3 +45,9 @@ urlpatterns += [
 urlpatterns += [
     path('capec/', include('updater_capec.urls'))
 ]
+
+# NPM
+
+urlpatterns += [
+    path('npm/', include('updater_npm.urls'))
+]
