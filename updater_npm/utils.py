@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import os
 import json
 import requests
 from datetime import datetime
 from dateutil.parser import parse as parse_datetime
 
-from .configuration import NPMConfig
+from .configurations import NPMConfig
 
 
 LOCAL_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,24 +41,24 @@ def upload_file():
     if not os.path.isdir(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root)):
         os.mkdir(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root))
     try:
-        file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root), NPMConfig.cpe_file)
+        file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root), NPMConfig.npm_file)
         head = requests.head(NPMConfig.source)
-        content_type = head.headers.get('Content-Type')
 
         fmt = "json"
 
         size = int(head.headers.get('Content-Length', 0))
         last_modified_text = head.headers.get('Last-Modified', '')
-        last_modified = time_string_to_datetime(last_modified_text)
+        if last_modified_text != '':
+            last_modified = time_string_to_datetime(last_modified_text)
 
         print('size: {}'.format(size))
-        print('last: {}'.format(last_modified_text))
+        print('last: {}'.format(last_modified))
         print('format: {}'.format(fmt))
 
-        file = requests.get(NPMConfig.source, stream=True)
+        upload_result = requests.get(NPMConfig.source, stream=True)
 
         with open(file_path, 'wb') as f:
-            for chunk in file:
+            for chunk in upload_result.iter_content(chunk_size=1024):
                 f.write(chunk)
 
         return file_path, True, last_modified, size, fmt
@@ -65,15 +67,18 @@ def upload_file():
     return None, False, last_modified, size, fmt
 
 
-def read_file(getfile, fmt='gzip', unpack=True):
+def read_file(getfile):
     data = None
     if os.path.exists(getfile):
         print('file exists')
         if os.path.isfile(getfile):
             print('file is a file')
-            with open(getfile, 'r') as fp:
+            with open(getfile, 'r', encoding='utf-8') as fp:
                 try:
                     data = json.load(fp)
+                    # text = fp.read()
+                    # text = text.decode("utf-8")
+                    # data = json.loads(text)
                 except Exception as ex:
                     return None, False, 'json file opened'
             return data, True, 'json file opened'

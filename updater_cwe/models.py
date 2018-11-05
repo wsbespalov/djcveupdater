@@ -8,7 +8,42 @@ from django.utils import timezone
 from django.core import serializers
 
 
+class STATUS_CWE(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    created = models.DateTimeField(default=timezone.now)
+    updated = models.DateTimeField(default=timezone.now)
+    count = models.IntegerField(default=0)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = "STATUS_CWE"
+        verbose_name_plural = "STATUS_CWES"
+
+    def __str__(self):
+        return "CWE Status: count: {}, created: {}, updated: {}".format(self.count, self.created, self.updated)
+
+    def __unicode__(self):
+        return "CWE Status"
+
+    def delete(self, *args, **kwargs):
+        return super(self.__class__, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super(self.__class__, self).save(*args, **kwargs)
+
+    @property
+    def data(self):
+        data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
+        data["count"] = self.count
+        data["created"] = self.created
+        data["updated"] = self.updated
+        return data
+
+
 class VULNERABILITY_CWE(models.Model):
+    id = models.BigAutoField(primary_key=True)
     cwe_id = models.TextField(unique=True)
     name = models.TextField(default="")
     status = models.TextField(default="")
@@ -38,6 +73,7 @@ class VULNERABILITY_CWE(models.Model):
     @property
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
         data["cwe_id"] = self.cwe_id
         data["name"] = self.name
         data["status"] = self.status
@@ -72,6 +108,7 @@ class VULNERABILITY_CWE_NEW(models.Model):
     @property
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
         data["cwe_id"] = self.cwe_id
         data["name"] = self.name
         data["status"] = self.status
@@ -111,6 +148,7 @@ class VULNERABILITY_CWE_MODIFIED(models.Model):
     @property
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
         data["cwe_id"] = self.cwe_id
         data["name"] = self.name
         data["status"] = self.status

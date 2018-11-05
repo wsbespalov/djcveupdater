@@ -115,13 +115,38 @@ class CPEController(object):
             )
         return None
 
+    @staticmethod
+    def check_if_capec_item_changed(old, new):
+        if old["title"] != new["title"] or \
+            old["cpe_2_2"] != new["cpe_2_2"] or \
+            old["references"] != new["references"] or \
+            old["component"] != new["component"] or \
+            old["version"] != new["version"] or \
+                old["vendor"] != new["vendor"]:
+            return True
+        return False
+
+    @staticmethod
+    def update_cpe_in_cpe_table(cpe):
+        return VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).update(
+            title=cpe['title'],
+            cpe_2_2=cpe['cpe_2_2'],
+            references=cpe['references'],
+            component=cpe['component'],
+            version=cpe['version'],
+            vendor=cpe['vendor']
+        )
+
     def create_or_update_cpe_vulnerability(self, cpe):
         objects = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"])
         if len(objects) == 0:
             self.append_cpe_in_vulnerability_cpe_table(cpe=cpe)
             self.append_cpe_in_vulnerability_cpe_new_table(cpe=cpe)
         else:
-            self.append_cpe_in_vulnerability_cpe_modified_table(cpe=cpe)
+            o = objects[0].data
+            if self.check_if_capec_item_changed(o, cpe):
+                self.update_cpe_in_cpe_table(cpe)
+                self.append_cpe_in_vulnerability_cpe_modified_table(cpe=cpe)
 
     @staticmethod
     def cpe_parser(cpe_string):
@@ -286,7 +311,7 @@ class CPEController(object):
         (file_path, success, last_modified, size, fmt) = upload_file()
         if success and file_path != '':
             # FIXME: Make last_modified comparison
-            (f, success, message) = read_file(file_path, fmt=fmt)
+            (f, success, message) = read_file(file_path)
             if f is None or not success:
                 return pack_answer(
                     status=TextMessages.exception.value,

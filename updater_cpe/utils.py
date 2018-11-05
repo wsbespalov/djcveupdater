@@ -87,39 +87,22 @@ def upload_file():
     return None, False, last_modified, size, fmt
 
 
-def read_file(getfile, fmt='gzip', unpack=True):
+def read_file(getfile):
     data = None
     if os.path.exists(getfile):
         print('file exists')
         if os.path.isfile(getfile):
             print('file is a file')
-            if unpack:
-                if fmt == 'gzip':
-                    with gzip.open(getfile, 'rb') as fp:
-                        print('read gzip file')
-                        data = fp.read()
-                        print(len(data))
-                        return data, True, 'gzip opened'
-                elif fmt == 'bzip2':
-                    print('read bzip2 file')
-                    zfile = bz2.BZ2File(getfile)
-                    data = BytesIO(zfile.read())
-                    print(len(data))
-                    return data, True, 'bzip2 opened'
-                elif fmt == 'zip':
-                    print('read zip file')
-                    unzipped_file = []
-                    zfile = zipfile.ZipFile(getfile, 'r')
-                    for name in zfile.namelist():
-                        unzipped_file.append(zfile.open(name))
-                    zfile.close()
-                    zfile = None
-                    print(len(unzipped_file))
-                    if len(unzipped_file) > 0:
-                        data = BytesIO(unzipped_file[0].read())
-                        return data, True, 'zip opened'
-                    return None, False, 'zip archive is empty'
-            with open(getfile, 'rb') as fp:
-                data = BytesIO(fp.read())
-            return data, True, 'raw file opened'
+            print('read zip file')
+            unzipped_file = []
+            zfile = zipfile.ZipFile(getfile, 'r')
+            for name in zfile.namelist():
+                unzipped_file.append(zfile.open(name))
+            zfile.close()
+            zfile = None
+            print(len(unzipped_file))
+            if len(unzipped_file) > 0:
+                data = BytesIO(unzipped_file[0].read())
+                return data, True, 'zip opened'
+            return None, False, 'zip archive is empty'
     return None, False, 'error with file read or unpack'

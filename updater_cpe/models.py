@@ -9,6 +9,39 @@ from django.utils import timezone
 from django.contrib.postgres.fields import ArrayField
 from django.core import serializers
 
+class STATUS_CPE(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    created = models.DateTimeField(default=timezone.now)
+    updated = models.DateTimeField(default=timezone.now)
+    count = models.IntegerField(default=0)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = "STATUS_CPE"
+        verbose_name_plural = "STATUS_CPE"
+
+    def __str__(self):
+        return "CPE Status: count: {}, created: {}, updated: {}".format(self.count, self.created, self.updated)
+
+    def __unicode__(self):
+        return "CPE Status"
+
+    def delete(self, *args, **kwargs):
+        return super(self.__class__, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super(self.__class__, self).save(*args, **kwargs)
+
+    @property
+    def data(self):
+        data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
+        data["count"] = self.count
+        data["created"] = self.created
+        data["updated"] = self.updated
+        return data
+
 
 class VULNERABILITY_CPE(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -32,6 +65,7 @@ class VULNERABILITY_CPE(models.Model):
     @property
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
         data["cpe_id"] = self.cpe_id
         data["title"] = self.title
         data["cpe_2_2"] = self.cpe_2_2
@@ -70,6 +104,7 @@ class VULNERABILITY_CPE_NEW(models.Model):
     @property
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
         data["cpe_id"] = self.cpe_id
         data["title"] = self.title
         data["cpe_2_2"] = self.cpe_2_2
@@ -108,6 +143,7 @@ class VULNERABILITY_CPE_MODIFIED(models.Model):
     @property
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
         data["cpe_id"] = self.cpe_id
         data["title"] = self.title
         data["cpe_2_2"] = self.cpe_2_2

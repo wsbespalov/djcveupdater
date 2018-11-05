@@ -109,13 +109,36 @@ class CAPECController(object):
 				related_weakness=capec["related_weakness"]
 			)
 
+	@staticmethod
+	def check_if_capec_item_changed(old, new):
+		if old["name"] != new["name"] or \
+			old["summary"] != new["summary"] or \
+			old["prerequisites"] != new["prerequisites"] or \
+			old["solutions"] != new["solutions"] or\
+				old["related_weakness"] != new["related_weakness"]:
+			return True
+		return False
+
+	@staticmethod
+	def update_capec_in_capec_table(capec):
+		return VULNERABILITY_CAPEC.objects.filter(capec_id=capec["capec_id"]).update(
+			name=capec["name"],
+			summary=capec["summary"],
+			prerequisites=capec["prerequisites"],
+			solutions=capec["solutions"],
+			related_weakness=capec["related_weakness"]
+		)
+
 	def create_or_update_capec_vulnertability(self, capec):
 		objects = VULNERABILITY_CAPEC.objects.filter(capec_id=capec['capec_id'])
 		if len(objects) == 0:
 			self.append_capec_in_vulnerability_capec_table(capec)
 			self.append_capec_in_vulnerability_capec_new_table(capec)
 		else:
-			self.append_capec_in_vulnerability_capec_modified_table(capec)
+			o = objects[0].data
+			if self.check_if_capec_item_changed(o, capec):
+				self.update_capec_in_capec_table(capec)
+				self.append_capec_in_vulnerability_capec_modified_table(capec)
 
 	def stats(self):
 		return pack_answer(
@@ -141,7 +164,7 @@ class CAPECController(object):
 		(file_path, success, last_modified, size, fmt) = upload_file()
 		if success and file_path != '':
 			# FIXME: Make last_modified comparison
-			(f, success, message) = read_file(file_path, fmt=fmt, unpack=False)
+			(f, success, message) = read_file(file_path)
 			if f is None or not success:
 				return pack_answer(
 					status=TextMessages.exception.value,

@@ -106,13 +106,34 @@ class CWEController(object):
                 description_summary=cwe['description_summary']
             )
 
+    @staticmethod
+    def check_if_cwe_item_changed(old, new):
+        if old["name"] != new["name"] or \
+            old["status"] != new["status"] or \
+            old["weaknesses"] != new["weaknesses"] or \
+                old["description_summary"] != new["description_summary"]:
+            return True
+        return False
+
+    @staticmethod
+    def update_cwe_in_cwe_table(cwe):
+        return VULNERABILITY_CWE.objects.filter(cwe_id=cwe["cwe_id"]).update(
+            name=cwe['name'],
+            status=cwe['status'],
+            weaknesses=cwe['weaknesses'],
+            description_summary=cwe['description_summary']
+        )
+
     def create_or_update_cwe_vulnerability(self, cwe):
         objects = VULNERABILITY_CWE.objects.filter(cwe_id=cwe['cwe_id'])
         if len(objects) == 0:
             self.append_cwe_in_vulnerability_cwe_table(cwe)
             self.append_cwe_in_vulnerability_cwe_new_table(cwe)
         else:
-            self.append_cwe_in_vulnerability_cwe_modified_table(cwe)
+            o = objects[0].data
+            if self.check_if_cwe_item_changed(o, cwe):
+                self.update_cwe_in_cwe_table(cwe)
+                self.append_cwe_in_vulnerability_cwe_modified_table(cwe)
 
     def stats(self):
         return pack_answer(
@@ -138,7 +159,7 @@ class CWEController(object):
         (file_path, success, last_modified, size, fmt) = upload_file()
         if success and file_path != '':
             # FIXME: Make last_modified comparison
-            (f, success, message) = read_file(file_path, fmt=fmt)
+            (f, success, message) = read_file(file_path)
             if f is None or not success:
                 return pack_answer(
                     status=TextMessages.exception.value,
