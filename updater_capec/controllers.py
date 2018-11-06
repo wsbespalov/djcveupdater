@@ -73,7 +73,7 @@ class CAPECController(object):
 		return VULNERABILITY_CAPEC_NEW.objects.count()
 
 	@staticmethod
-	def count_vulnerability_modified_table():
+	def count_vulnerability_capec_modified_table():
 		return VULNERABILITY_CAPEC_MODIFIED.objects.count()
 
 	@staticmethod
@@ -186,7 +186,7 @@ class CAPECController(object):
 			capec_cnt_before=self.count_vulnerability_capec_table(),
 			capec_cnt_after=self.count_vulnerability_capec_table(),
 			new_cnt=self.count_vulnerability_capec_new_tabele(),
-			modified_cnt=self.count_vulnerability_modified_table()
+			modified_cnt=self.count_vulnerability_capec_modified_table()
 		)
 
 	def update(self):
@@ -240,7 +240,7 @@ class CAPECController(object):
 				capec_cnt_before=count_before,
 				capec_cnt_after=count_after,
 				new_cnt=self.count_vulnerability_capec_new_tabele(),
-				modified_cnt=self.count_vulnerability_modified_table()
+				modified_cnt=self.count_vulnerability_capec_modified_table()
 			)
 		return pack_answer(
 			status=TextMessages.error.value,
