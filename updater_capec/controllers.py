@@ -1,20 +1,24 @@
 from xml.sax import make_parser
 
+from django.utils import timezone
+
 from .utils import upload_file
 from .utils import read_file
+from .utils import time_string_to_datetime
 
 from .handlers import CAPECHandler
 
 from .models import VULNERABILITY_CAPEC
 from .models import VULNERABILITY_CAPEC_NEW
 from .models import VULNERABILITY_CAPEC_MODIFIED
+from .models import STATUS_CAPEC
 
 from .configurations import CAPECConfig
 
+from .text_messages import TextMessages
+
 import logging
 logger = logging.getLogger(__name__)
-
-from .text_messages import TextMessages
 
 
 def print_debug(message):
@@ -73,7 +77,7 @@ class CAPECController(object):
 		return VULNERABILITY_CAPEC_MODIFIED.objects.count()
 
 	@staticmethod
-	def append_capec_in_vulnerability_capec_table(capec):
+	def append_capec_in_vulnerability_capec_table(capec: dict):
 		return VULNERABILITY_CAPEC.objects.create(
 			capec_id=capec["capec_id"],
 			name=capec["name"],
@@ -84,7 +88,7 @@ class CAPECController(object):
 		)
 
 	@staticmethod
-	def append_capec_in_vulnerability_capec_new_table(capec):
+	def append_capec_in_vulnerability_capec_new_table(capec: dict):
 		objects = VULNERABILITY_CAPEC_NEW.objects.filter(capec_id=capec['capec_id'])
 		if len(objects) == 0:
 			return VULNERABILITY_CAPEC_NEW.objects.create(
@@ -97,7 +101,7 @@ class CAPECController(object):
 			)
 
 	@staticmethod
-	def append_capec_in_vulnerability_capec_modified_table(capec):
+	def append_capec_in_vulnerability_capec_modified_table(capec: dict):
 		objects = VULNERABILITY_CAPEC_MODIFIED.objects.filter(capec_id=capec['capec_id'])
 		if len(objects) == 0:
 			return VULNERABILITY_CAPEC_MODIFIED.objects.create(
@@ -110,17 +114,52 @@ class CAPECController(object):
 			)
 
 	@staticmethod
-	def check_if_capec_item_changed(old, new):
+	def save_status_in_local_status_table(status: dict):
+		obj = STATUS_CAPEC.objects.filter(name="capec")
+		if obj:
+			return STATUS_CAPEC.objects.filter(name="capec").update(
+				count=status.get("count", 0),
+				updated=status.get("updated", timezone.now())
+			)
+		return STATUS_CAPEC.objects.create(
+			name="capec",
+			count=status.get("count", 0),
+			created=timezone.now(),
+			updated=status.get("updated", timezone.now())
+		)
+
+	@staticmethod
+	def get_status_from_local_status_table() -> dict:
+		obj = STATUS_CAPEC.objects.filter(name="capec")
+		if obj:
+			return obj.data
+		return dict(
+			exists=False,
+			count=0,
+			created=timezone.now(),
+			updated=timezone.now()
+		)
+
+	@staticmethod
+	def save_status_in_global_status_table(status: dict):
+		pass
+
+	@staticmethod
+	def get_status_from_global_status_table() -> dict:
+		pass
+
+	@staticmethod
+	def check_if_capec_item_changed(old: dict, new: dict):
 		if old["name"] != new["name"] or \
 			old["summary"] != new["summary"] or \
 			old["prerequisites"] != new["prerequisites"] or \
 			old["solutions"] != new["solutions"] or\
-				old["related_weakness"] != new["related_weakness"]:
+			old["related_weakness"] != new["related_weakness"]:
 			return True
 		return False
 
 	@staticmethod
-	def update_capec_in_capec_table(capec):
+	def update_capec_in_capec_table(capec: dict):
 		return VULNERABILITY_CAPEC.objects.filter(capec_id=capec["capec_id"]).update(
 			name=capec["name"],
 			summary=capec["summary"],
@@ -129,7 +168,7 @@ class CAPECController(object):
 			related_weakness=capec["related_weakness"]
 		)
 
-	def create_or_update_capec_vulnertability(self, capec):
+	def create_or_update_capec_vulnertability(self, capec: dict):
 		objects = VULNERABILITY_CAPEC.objects.filter(capec_id=capec['capec_id'])
 		if len(objects) == 0:
 			self.append_capec_in_vulnerability_capec_table(capec)
@@ -150,11 +189,9 @@ class CAPECController(object):
 			modified_cnt=self.count_vulnerability_modified_table()
 		)
 
-	@staticmethod
-	def set_state_in_status_table(status):
-		pass
-
 	def update(self):
+		if CAPECConfig.drop_core_table:
+			self.clear_vulneranility_capec_table()
 		self.clear_vulnerability_capec_new_table()
 		self.clear_vulnerability_capec_modified_table()
 		count_before = count_after = self.count_vulnerability_capec_table()
@@ -176,13 +213,27 @@ class CAPECController(object):
 				)
 			logger.info(TextMessages.parse_data.value)
 			parser.parse(f)
+
 			count = 0
 			for capec in capec_handler.capec:
 				print_debug('processing: {}'.format(count))
 				count += 1
 				capec['capec_id'] = 'CAPEC-{}'.format(capec['id'])
+				related_weakness = capec.get("related_weakness", [])
+				if related_weakness:
+					for index, value in related_weakness:
+						related_weakness[index] = "CWE-{}".format(value)
+				capec["related_weakness"] = related_weakness
+
 				self.create_or_update_capec_vulnertability(capec)
+
 			count_after = self.count_vulnerability_capec_table()
+
+			self.save_status_in_local_status_table(dict(
+				count=count_after,
+				updated=time_string_to_datetime(last_modified)
+			))
+
 			return pack_answer(
 				status=TextMessages.ok.value,
 				message=TextMessages.capec_updated.value,
@@ -199,31 +250,3 @@ class CAPECController(object):
 			new_cnt=0,
 			modified_cnt=0
 		)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

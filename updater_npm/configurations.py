@@ -1,6 +1,7 @@
 
 
 class NPMConfig(object):
+    drop_core_table = True
     debug = True
     undefined = "undefined"
     http_ignore_certs = False

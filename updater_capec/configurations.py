@@ -1,6 +1,7 @@
 
 
 class CAPECConfig(object):
+    drop_core_table = True
     debug = True
     http_ignore_certs = False
     proxy = ""

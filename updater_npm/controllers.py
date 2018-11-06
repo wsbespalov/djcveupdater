@@ -1,10 +1,13 @@
 import os
 import re
-from .text_messages import TextMessages
 from re import findall
 
+from django.utils import timezone
 from django.utils.timezone import make_aware
 
+from .text_messages import TextMessages
+
+from .models import STATUS_NPM
 from .models import VULNERABILITY_NPM
 from .models import VULNERABILITY_NPM_NEW
 from .models import VULNERABILITY_NPM_MODIFIED
@@ -156,6 +159,42 @@ class NPMController(object):
                 cwe=npm["cwe"],
                 source=npm["source"]
             )
+
+
+    @staticmethod
+    def save_status_in_local_status_table(status: dict):
+        obj = STATUS_NPM.objects.filter(name="npm")
+        if obj:
+            return STATUS_NPM.objects.filter(name="npm").update(
+                count=status.get("count", 0),
+                updated=status.get("updated", timezone.now())
+            )
+        return STATUS_NPM.objects.create(
+            name="npm",
+            count=status.get("count", 0),
+            created=make_aware(timezone.now()),
+            updated=status.get("updated", timezone.now())
+        )
+
+    @staticmethod
+    def get_status_from_local_status_table() -> dict:
+        obj = STATUS_NPM.objects.filter(name="npm")
+        if obj:
+            return obj.data
+        return dict(
+            exists=False,
+            count=0,
+            created=timezone.now(),
+            updated=timezone.now()
+        )
+
+    @staticmethod
+    def save_status_in_global_status_table(status: dict):
+        pass
+
+    @staticmethod
+    def get_status_from_global_status_table() -> dict:
+        pass
 
     @staticmethod
     def check_if_npm_item_changed(old, new):
@@ -482,7 +521,8 @@ class NPMController(object):
         )
 
     def update(self):
-        print('update')
+        if NPMConfig.drop_core_table:
+            self.clear_vulnerability_npm_table()
         self.clear_vulnerability_npm_new_table()
         self.clear_vulnerability_npm_modified_table()
         count_before = count_after = self.count_vulnerability_npm_table()
@@ -514,12 +554,12 @@ class NPMController(object):
                             npm_item['patched_versions']
                         )
                     npm["npm_id"] = 'NPM-' + str(npm_item['id']) if npm_item['id'] != UNDEFINED else UNDEFINED
-                    npm["created"] = make_aware(time_string_to_datetime(unify_time(npm_item['created_at'])))
-                    npm["updated"] = make_aware(time_string_to_datetime(unify_time(npm_item['updated_at'])))
+                    npm["created"] = time_string_to_datetime(unify_time(npm_item['created_at']))
+                    npm["updated"] = time_string_to_datetime(unify_time(npm_item['updated_at']))
                     npm["title"] = npm_item['title']
                     npm["author"] = npm_item['author']
                     npm["module_name"] = npm_item['module_name']
-                    npm["published_date"] = make_aware(time_string_to_datetime(unify_time(npm_item['publish_date'])))
+                    npm["published_date"] = time_string_to_datetime(unify_time(npm_item['publish_date']))
                     npm["cves"] = npm_item['cves']
                     npm["vulnerable_versions"] = vulnerable_versions_
                     npm["patched_versions"] = patched_versions_
@@ -531,9 +571,29 @@ class NPMController(object):
                     npm["allowed_scopes"] = npm_item['allowed_scopes']
                     npm["cvss_vector"] = self.make_cvss_vector(npm_item['cvss_vector'])
                     npm["cvss_score"] = float(npm_item['cvss_score'])
-                    npm["cwe"] = 'CWE-{}'.format(npm_item['cwe'])
+                    npm["cwe"] = npm_item['cwe']
                     npm["source"] = self.get_npm_module_source(npm_item['module_name'])
 
                     self.create_or_update_npm_vulnerability(npm=npm)
 
-
+            count_after = self.count_vulnerability_npm_table()
+            self.save_status_in_local_status_table(dict(
+                count=count_after,
+                updated=time_string_to_datetime(last_modified)
+            ))
+            return pack_answer(
+                status=TextMessages.ok.value,
+                message=TextMessages.npm_updated.value,
+                npm_cnt_before=count_before,
+                npm_cnt_after=count_after,
+                new_cnt=self.count_vulnerability_npm_new_table(),
+                modified_cnt=self.count_vulnerability_npm_modified_table()
+            )
+        return pack_answer(
+            status=TextMessages.error.value,
+            message=TextMessages.cant_download_file.value,
+            npm_cnt_before=count_before,
+            npm_cnt_after=count_after,
+            new_cnt=0,
+            modified_cnt=0
+        )

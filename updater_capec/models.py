@@ -12,6 +12,7 @@ from django.core import serializers
 
 class STATUS_CAPEC(models.Model):
     id = models.BigAutoField(primary_key=True)
+    name = models.TextField(default="")
     created = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(default=timezone.now)
     count = models.IntegerField(default=0)
@@ -38,10 +39,12 @@ class STATUS_CAPEC(models.Model):
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
         data["id"] = self.id
+        data["name"] = self.name
         data["count"] = self.count
         data["created"] = self.created
         data["updated"] = self.updated
         return data
+
 
 class VULNERABILITY_CAPEC(models.Model):
     id = models.BigAutoField(primary_key=True)

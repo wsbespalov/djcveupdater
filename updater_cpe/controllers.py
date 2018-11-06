@@ -1,6 +1,10 @@
 from xml.sax import make_parser
 
+from django.utils import timezone
+from django.utils.timezone import make_aware
+
 from .utils import to_string_formatted_cpe
+from .utils import time_string_to_datetime
 from .utils import upload_file
 from .utils import read_file
 
@@ -8,6 +12,7 @@ from .text_messages import TextMessages
 
 from .handlers import CPEHandler
 
+from .models import STATUS_CPE
 from .models import VULNERABILITY_CPE
 from .models import VULNERABILITY_CPE_NEW
 from .models import VULNERABILITY_CPE_MODIFIED
@@ -114,6 +119,41 @@ class CPEController(object):
                 vendor=cpe['vendor']
             )
         return None
+
+    @staticmethod
+    def save_status_in_local_status_table(status: dict):
+        obj = STATUS_CPE.objects.filter(name="cpe")
+        if obj:
+            return STATUS_CPE.objects.filter(name="cpe").update(
+                count=status.get("count", 0),
+                updated=status.get("updated", timezone.now())
+            )
+        return STATUS_CPE.objects.create(
+            name="cpe",
+            count=status.get("count", 0),
+            created=timezone.now(),
+            updated=status.get("updated", timezone.now())
+        )
+
+    @staticmethod
+    def get_status_from_local_status_table() -> dict:
+        obj = STATUS_CPE.objects.filter(name="cpe")
+        if obj:
+            return obj.data
+        return dict(
+            exists=False,
+            count=0,
+            created=timezone.now(),
+            updated=timezone.now()
+        )
+
+    @staticmethod
+    def save_status_in_global_status_table(status: dict):
+        pass
+
+    @staticmethod
+    def get_status_from_global_status_table() -> dict:
+        pass
 
     @staticmethod
     def check_if_capec_item_changed(old, new):
@@ -297,11 +337,8 @@ class CPEController(object):
         pass
 
     def update(self):
-        """
-        Make Update of CPE Resource
-        :return:
-        - response in dict
-        """
+        if CPEConfig.drop_core_table:
+            self.clear_vulnerability_cpe_table()
         self.clear_vulnerability_cpe_new_table()
         self.clear_vulnerability_cpe_modified_table()
         count_before = count_after = self.count_vulnerability_cpe_table()
@@ -342,6 +379,10 @@ class CPEController(object):
                 x['vendor'] = vendor
                 self.create_or_update_cpe_vulnerability(x)
             count_after = self.count_vulnerability_cpe_table()
+            self.save_status_in_local_status_table(dict(
+                count=count_after,
+                updated=time_string_to_datetime(last_modified)
+            ))
             return pack_answer(
                 status=TextMessages.ok.value,
                 message=TextMessages.cpe_updated.value,

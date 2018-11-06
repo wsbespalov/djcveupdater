@@ -12,6 +12,7 @@ from django.core import serializers
 
 class STATUS_NPM(models.Model):
     id = models.BigAutoField(primary_key=True)
+    name = models.TextField(default="")
     created = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(default=timezone.now)
     count = models.IntegerField(default=0)
@@ -37,6 +38,7 @@ class STATUS_NPM(models.Model):
     @property
     def data(self):
         data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["name"] = self.name
         data["id"] = self.id
         data["count"] = self.count
         data["created"] = self.created
