@@ -2,16 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a5270131-58c0-48ac-97e2-fb4e59a2d915" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/updater_snyk/configurations.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/updater_snyk/controllers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/updater_snyk/text_messages.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/updater_snyk/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/updater_snyk/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cveupdater/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/cveupdater/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cveupdater/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/cveupdater/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/updater_capec/controllers.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_capec/controllers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/updater_capec/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_capec/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updater_snyk/controllers.py" beforeDir="false" afterPath="$PROJECT_DIR$/updater_snyk/controllers.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -65,7 +57,7 @@
     <session id="224526871">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="15" />
+          <entry key="project.closed" value="18" />
           <entry key="project.open.time.101" value="1" />
           <entry key="project.open.time.11" value="1" />
           <entry key="project.open.time.147" value="1" />
@@ -74,27 +66,30 @@
           <entry key="project.open.time.31" value="1" />
           <entry key="project.open.time.38" value="1" />
           <entry key="project.open.time.39" value="1" />
-          <entry key="project.open.time.44" value="1" />
+          <entry key="project.open.time.41" value="1" />
+          <entry key="project.open.time.44" value="2" />
+          <entry key="project.open.time.46" value="1" />
           <entry key="project.open.time.54" value="1" />
           <entry key="project.open.time.6" value="3" />
           <entry key="project.open.time.64" value="1" />
           <entry key="project.open.time.7" value="2" />
-          <entry key="project.opened" value="16" />
+          <entry key="project.opened" value="19" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="gitignore" value="1" />
           <entry key="json" value="2" />
-          <entry key="py" value="246" />
+          <entry key="py" value="257" />
+          <entry key="txt" value="1" />
           <entry key="xml" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="JSON" value="2" />
-          <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="246" />
+          <entry key="PLAIN_TEXT" value="2" />
+          <entry key="Python" value="257" />
           <entry key="XML" value="1" />
         </counts>
       </usages-collector>
@@ -103,14 +98,14 @@
           <entry key="Python Console" value="175" />
           <entry key="dummy" value="13" />
           <entry key="gitignore" value="13" />
-          <entry key="py" value="20841" />
+          <entry key="py" value="21106" />
           <entry key="txt" value="98" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="124" />
-          <entry key="Python" value="21016" />
+          <entry key="Python" value="21281" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.js.language.service.starts" />
@@ -123,24 +118,44 @@
     <favorites_list name="djcveupdater" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/updater_snyk/utils.py">
+        <entry file="file://$PROJECT_DIR$/updater_snyk/controllers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="675">
-              <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
+            <state relative-caret-position="423">
+              <caret line="46" lean-forward="true" selection-start-line="46" selection-end-line="46" />
               <folding>
-                <element signature="e#0#15#0" expanded="true" />
+                <element signature="e#0#9#0" expanded="true" />
+                <marker date="1541604488480" expanded="true" signature="6363:6369" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/updater_snyk/configurations.py">
+        <entry file="file://$PROJECT_DIR$/updater_snyk/urls.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/updater_snyk/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="125">
-              <caret line="5" column="26" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+            <state relative-caret-position="250">
+              <caret line="15" column="19" lean-forward="true" selection-start-line="15" selection-start-column="19" selection-end-line="15" selection-end-column="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/updater_snyk/admin.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/updater_snyk/apps.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="100">
+              <caret line="4" column="24" selection-start-line="4" selection-start-column="12" selection-end-line="4" selection-end-column="24" />
             </state>
           </provider>
         </entry>
@@ -148,49 +163,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/updater_snyk/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="607">
-              <caret line="175" column="58" lean-forward="true" selection-start-line="160" selection-start-column="4" selection-end-line="175" selection-end-column="58" />
-              <folding>
-                <marker date="1541513635612" expanded="true" signature="1366:1367" ph="..." />
-                <marker date="1541513635612" expanded="true" signature="1366:1371" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/updater_snyk/controllers.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="647">
-              <caret line="723" column="93" selection-start-line="723" selection-start-column="93" selection-end-line="723" selection-end-column="93" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <marker date="1541519544086" expanded="true" signature="15271:15280" ph="..." />
-                <marker date="1541519544086" expanded="true" signature="25407:28964" ph="..." />
-              </folding>
+            <state relative-caret-position="71">
+              <caret line="158" column="6" selection-start-line="158" selection-start-column="6" selection-end-line="158" selection-end-column="6" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/updater_snyk/text_messages.py">
+        <entry file="file://$PROJECT_DIR$/updater_snyk/configurations.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="250">
-              <caret line="10" column="39" selection-start-line="10" selection-start-column="39" selection-end-line="10" selection-end-column="39" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/updater_npm/controllers.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="533" column="16" lean-forward="true" selection-start-line="533" selection-start-column="16" selection-end-line="540" selection-end-column="17" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <marker date="1541510116931" expanded="true" signature="6515:8401" ph="..." />
-                <marker date="1541510116931" expanded="true" signature="7592:8401" ph="..." />
-              </folding>
+            <state relative-caret-position="50">
+              <caret line="2" column="6" selection-start-line="2" selection-start-column="6" selection-end-line="2" selection-end-column="6" />
             </state>
           </provider>
         </entry>
@@ -227,6 +210,7 @@
       <find>STATUS_CAPEC</find>
       <find>process_npm_vulner_to_get_vulnerable_and_patched_versions</find>
       <find>process_vulnerable_versions</find>
+      <find>NPMConfig</find>
     </findStrings>
     <replaceStrings>
       <replace>STATUS_CWE</replace>
@@ -241,6 +225,7 @@
       <replace>=VULNERABILITY_SNYK_MODIFIED</replace>
       <replace>STATUS_ЫТНЛ</replace>
       <replace>STATUS_SNYK</replace>
+      <replace>SNYKConfig</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -337,7 +322,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -353,16 +337,6 @@
             <path>
               <item name="djcveupdater" type="b2602c69:ProjectViewProjectNode" />
               <item name="djcveupdater" type="462c0819:PsiDirectoryNode" />
-              <item name="updater_capec" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="djcveupdater" type="b2602c69:ProjectViewProjectNode" />
-              <item name="djcveupdater" type="462c0819:PsiDirectoryNode" />
-              <item name="updater_npm" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="djcveupdater" type="b2602c69:ProjectViewProjectNode" />
-              <item name="djcveupdater" type="462c0819:PsiDirectoryNode" />
               <item name="updater_snyk" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -370,6 +344,7 @@
         </subPane>
       </pane>
       <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -459,6 +434,8 @@
       <updated>1540550353377</updated>
       <workItem from="1541503295472" duration="221000" />
       <workItem from="1541503556098" duration="10352000" />
+      <workItem from="1541582360948" duration="590000" />
+      <workItem from="1541603514768" duration="1054000" />
     </task>
     <task id="LOCAL-00001" summary="fix imports">
       <created>1541152100542</created>
@@ -492,7 +469,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="10573000" />
+    <option name="totallyTimeSpent" value="12217000" />
   </component>
   <component name="TodoView" selected-index="1">
     <todo-panel id="selected-file">
@@ -506,8 +483,8 @@
   <component name="ToolWindowManager">
     <frame x="54" y="-8" width="1874" height="1096" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49844238" visible="true" weight="0.1356119" />
-      <window_info id="Favorites" order="1" sideWeight="0.5005192" side_tool="true" weight="0.104189634" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49844238" visible="true" weight="0.14057332" />
+      <window_info id="Favorites" order="1" sideWeight="0.50155765" side_tool="true" weight="0.14057332" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
       <window_info id="Capture Tool" order="4" />
@@ -518,7 +495,7 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39786097" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32942432" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32917964" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
@@ -537,7 +514,7 @@
       <window_info anchor="right" id="Maven Projects" order="7" />
       <window_info anchor="right" id="Palette&#9;" order="8" />
       <window_info anchor="right" id="Theme Preview" order="9" />
-      <window_info anchor="right" id="Structure" order="10" sideWeight="0.50155765" side_tool="true" weight="0.2094818" />
+      <window_info anchor="right" id="Structure" order="10" sideWeight="0.50155765" side_tool="true" visible="true" weight="0.120176405" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -553,42 +530,7 @@
     <MESSAGE value="complete updater_cwe" />
     <option name="LAST_COMMIT_MESSAGE" value="complete updater_cwe" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/updater_npm/controllers.py</url>
-          <line>218</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/stats/models.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cwe/handlers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="4" column="4" selection-start-line="4" selection-start-column="4" selection-end-line="4" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cwe/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="6" column="28" selection-start-line="6" selection-start-column="28" selection-end-line="6" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_cwe/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="286">
-          <caret line="13" column="30" selection-start-line="13" selection-start-column="30" selection-end-line="13" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/media/cpe.xml">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -736,9 +678,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="850">
           <caret line="39" column="32" selection-start-line="39" selection-start-column="32" selection-end-line="39" selection-end-column="32" />
-          <folding>
-            <element signature="e#0#39#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -788,9 +727,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="295">
           <caret line="226" column="62" lean-forward="true" selection-start-line="226" selection-start-column="62" selection-end-line="226" selection-end-column="62" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -808,34 +744,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/updater_snyk/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="8" column="1" selection-start-line="8" selection-end-line="8" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_snyk/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-          <folding>
-            <element signature="e#0#35#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/updater_capec/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="50">
           <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cveupdater/settings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="529">
-          <caret line="45" column="17" selection-start-line="45" selection-start-column="17" selection-end-line="45" selection-end-column="17" />
         </state>
       </provider>
     </entry>
@@ -857,29 +769,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="290">
           <caret line="74" column="28" selection-start-line="71" selection-start-column="4" selection-end-line="74" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#39#0" expanded="true" />
-            <marker date="1541502235389" expanded="true" signature="1420:1421" ph="..." />
-            <marker date="1541502235389" expanded="true" signature="1420:1425" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_snyk/configurations.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="125">
-          <caret line="5" column="26" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/updater_snyk/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="607">
-          <caret line="175" column="58" lean-forward="true" selection-start-line="160" selection-start-column="4" selection-end-line="175" selection-end-column="58" />
-          <folding>
-            <marker date="1541513635612" expanded="true" signature="1366:1367" ph="..." />
-            <marker date="1541513635612" expanded="true" signature="1366:1371" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -887,12 +776,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="340">
           <caret line="196" column="29" selection-start-line="196" selection-start-column="29" selection-end-line="196" selection-end-column="29" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-            <marker date="1541514192900" expanded="true" signature="3507:3690" ph="..." />
-            <marker date="1541514192900" expanded="true" signature="3833:3843" ph="..." />
-            <marker date="1541514192900" expanded="true" signature="4491:4494" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -903,47 +786,82 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/updater_snyk/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="675">
-          <caret line="27" lean-forward="true" selection-start-line="27" selection-end-line="27" />
-          <folding>
-            <element signature="e#0#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/updater_npm/text_messages.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/updater_snyk/text_messages.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="10" column="39" selection-start-line="10" selection-start-column="39" selection-end-line="10" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/utils.py" />
     <entry file="file://$PROJECT_DIR$/updater_npm/controllers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="533" column="16" lean-forward="true" selection-start-line="533" selection-start-column="16" selection-end-line="540" selection-end-column="17" />
+        <state relative-caret-position="25">
+          <caret line="257" selection-start-line="257" selection-end-line="257" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <marker date="1541510116931" expanded="true" signature="6515:8401" ph="..." />
-            <marker date="1541510116931" expanded="true" signature="7592:8401" ph="..." />
           </folding>
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="71">
+          <caret line="158" column="6" selection-start-line="158" selection-start-column="6" selection-end-line="158" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/text_messages.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="125">
+          <caret line="5" column="17" selection-start-line="5" selection-start-column="17" selection-end-line="5" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/configurations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="50">
+          <caret line="2" column="6" selection-start-line="2" selection-start-column="6" selection-end-line="2" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manage.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/requirements.txt">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/updater_snyk/controllers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="647">
-          <caret line="723" column="93" selection-start-line="723" selection-start-column="93" selection-end-line="723" selection-end-column="93" />
+        <state relative-caret-position="423">
+          <caret line="46" lean-forward="true" selection-start-line="46" selection-end-line="46" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <marker date="1541519544086" expanded="true" signature="15271:15280" ph="..." />
-            <marker date="1541519544086" expanded="true" signature="25407:28964" ph="..." />
+            <marker date="1541604488480" expanded="true" signature="6363:6369" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/urls.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="15" column="19" lean-forward="true" selection-start-line="15" selection-start-column="19" selection-end-line="15" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/admin.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cveupdater/settings.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-846">
+          <caret line="86" column="57" selection-start-line="86" selection-start-column="19" selection-end-line="86" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updater_snyk/apps.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret line="4" column="24" selection-start-line="4" selection-start-column="12" selection-end-line="4" selection-end-column="24" />
         </state>
       </provider>
     </entry>

@@ -35,8 +35,10 @@ a_selector = CSSSelector('a')
 
 LOCAL_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-versions_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root), NPMConfig.versions_file_name)
-source_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root), NPMConfig.source_file_name)
+# FIXME: Look for versions_file_name and source file name variables
+versions_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, SNYKConfig.file_storage_root), SNYKConfig.versions_file_name)
+source_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, SNYKConfig.file_storage_root), SNYKConfig.source_file_name)
+
 
 def print_debug(message):
     if SNYKConfig.debug:
@@ -67,7 +69,7 @@ def pack_answer(
 class SNYKController(object):
     
     @staticmethod
-    def clear_vulneranility_snyk_table():
+    def __clear_vulneranility_snyk_table():
         for x in VULNERABILITY_SNYK.objects.all().iterator():
             x.delete()
 
@@ -730,7 +732,7 @@ class SNYKController(object):
 
     def update(self):
         if SNYKConfig.drop_core_table:
-            self.clear_vulneranility_snyk_table()
+            self.__clear_vulneranility_snyk_table()
         self.clear_vulnerability_snyk_new_table()
         self.clear_vulnerability_snyk_modified_table()
         count_before = count_after = self.count_vulnerability_snyk_table()
