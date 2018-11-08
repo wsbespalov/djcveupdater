@@ -2,6 +2,23 @@ import requests
 from lxml import html
 
 from .configurations import SNYKConfig
+from datetime import datetime
+from dateutil.parser import parse as parse_datetime
+
+
+def time_string_to_datetime(time_string):
+    return parse_datetime(time_string)
+
+
+def unify_time(dt):
+    if isinstance(dt, str):
+        if 'Z' in dt:
+            dt = dt.replace('Z', '')
+        return parse_datetime(dt).strftime("%Y-%m-%d %H:%M:%S")
+
+    if isinstance(dt, datetime):
+        return parse_datetime(str(dt)).strftime("%Y-%m-%d %H:%M:%S")
+
 
 def startswith(st, start):
     if str(st).startswith(start):
@@ -45,7 +62,7 @@ def download_page_from_url(page_url):
         if page.status_code == 200:
             try:
                 tree = html.fromstring(page.content)
-                return tree, False, 'ok'
+                return tree, True, 'ok'
             except Exception as ex:
                 return None, False, "Get an exception with download page from url: {}".format(ex)
     except Exception as ex:

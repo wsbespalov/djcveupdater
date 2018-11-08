@@ -3,6 +3,7 @@ import re
 import sys
 import time
 import json
+import dateparser
 from datetime import datetime
 
 from django.utils import timezone
@@ -18,6 +19,8 @@ from .utils import startswith
 from .utils import find_between
 from .utils import filter_vuln_links
 from .utils import download_page_from_url
+from .utils import time_string_to_datetime
+from .utils import unify_time
 
 
 from .models import STATUS_SNYK
@@ -35,7 +38,6 @@ a_selector = CSSSelector('a')
 
 LOCAL_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# FIXME: Look for versions_file_name and source file name variables
 versions_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, SNYKConfig.file_storage_root), SNYKConfig.versions_file_name)
 source_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, SNYKConfig.file_storage_root), SNYKConfig.source_file_name)
 
@@ -390,9 +392,9 @@ class SNYKController(object):
         return patched__versions__to__save
 
     def process_npm_vulner_to_get_vulnerable_and_patched_versions(self,
-                                                                      module_name,
-                                                                      vulnerable_versions,
-                                                                      patched_versions):
+                                                                  module_name,
+                                                                  vulnerable_versions,
+                                                                  patched_versions):
         vulnerable__versions__for__module = []
         command__get__npm__versions = "npm show {} versions > {}".format(module_name, versions_file_path)
         if os.path.exists(versions_file_path):
@@ -677,7 +679,16 @@ class SNYKController(object):
                 while continue_work:
                     print_debug("Processing page # {0}".format(page_number))
                     page_url = create_url(page_number, source)
-                    tree = download_page_from_url(page_url)
+                    (tree, success, message) = download_page_from_url(page_url)
+                    if not success:
+                        return pack_answer(
+                            status=TextMessages.error.value,
+                            message="{}".format(message),
+                            snyk_cnt_before=self.count_vulnerability_snyk_table(),
+                            snyk_cnt_after=self.count_vulnerability_snyk_table(),
+                            new_cnt=self.count_vulnerability_snyk_new_tabele(),
+                            modified_cnt=self.count_vulnerability_snyk_modified_table()
+                        )
                     if tree is not None:
                         try:
                             f = a_selector(tree)
@@ -698,17 +709,34 @@ class SNYKController(object):
                     else:
                         for pn in range(len(filtered_links)):
                             d_url = "".join(["https://snyk.io", filtered_links[pn]])
-                            page_tree = download_page_from_url(d_url)
+                            (page_tree, success, message) = download_page_from_url(d_url)
 
                             if page_tree is not None:
                                 snyk_vulner = self.parse_page(page_tree, source)
-                                snyk_vulner["source"] = "snyk"
-                                snyk_vulner["source_url"] = d_url
-                                snyk_vulner["type"] = source
 
-                                self.create_or_update_snyk_vulnertability(snyk_vulner)
+                                if snyk_vulner["snyk_id"] != SNYKConfig.undefined:
+                                    snyk_vulner["source"] = "snyk"
+                                    snyk_vulner["source_url"] = d_url
+                                    snyk_vulner["type"] = source
+                                    if "disclosed" in snyk_vulner:
+                                        if snyk_vulner["disclosed"] == SNYKConfig.undefined:
+                                            snyk_vulner["disclosed"] = timezone.now()
+                                        else:
+                                            snyk_vulner["disclosed"] = dateparser.parse(snyk_vulner["disclosed"])
+                                    else:
+                                        snyk_vulner["disclosed"] = timezone.now()
+                                    if "published" in snyk_vulner:
+                                        if snyk_vulner["published"] == SNYKConfig.undefined:
+                                            snyk_vulner["published"] = timezone.now()
+                                        else:
+                                            snyk_vulner["published"] = dateparser.parse(snyk_vulner["published"])
+                                    else:
+                                        snyk_vulner["published"] = unify_time(timezone.now())
 
-                                snyk_count += 1
+
+                                    self.create_or_update_snyk_vulnertability(snyk_vulner)
+
+                                    snyk_count += 1
                     page_number += 1
             print_debug("Complete populating {} Snyk vulnerabilities".format(snyk_count))
             return pack_answer(
@@ -739,14 +767,7 @@ class SNYKController(object):
 
         if count_before == 0:
             print_debug("You want populate Snyk vulnerabilities, but Snyk table is empty. Needs to populate it.")
-            return pack_answer(
-                status=TextMessages.error.value,
-                message="You want populate Snyk vulnerabilities, but Snyk table is empty. Needs to populate it.",
-                snyk_cnt_before=count_before,
-                snyk_cnt_after=count_after,
-                new_cnt=0,
-                modified_cnt=0
-            )
+            self.populate()
         else:
             created_snyk_vulners = []
             filtered_links = []
@@ -781,24 +802,46 @@ class SNYKController(object):
                     else:
                         for pn in range(len(filtered_links)):
                             d_url = "".join(["https://snyk.io", filtered_links[pn]])
-                            page_tree = download_page_from_url(d_url)
+                            (page_tree, success, message) = download_page_from_url(d_url)
 
                             if page_tree is not None:
                                 snyk_vulner = self.parse_page(page_tree, source)
-                                snyk_vulner["source"] = "snyk"
-                                snyk_vulner["source_url"] = d_url
-                                snyk_vulner["type"] = source
-                                result = self.create_or_update_snyk_vulnertability(snyk_vulner)
-                                if result == "updated":
-                                    print_debug("Riched end of update")
-                                    continue_work = False
-                                elif result == "skipped":
-                                    print_debug("Riched end of update")
-                                    continue_work = False
-                                elif result == "created":
-                                    print_debug("Find new Snyk vulnerability: {}".format(snyk_vulner["header_title"]))
+                                if snyk_vulner["snyk_id"] != SNYKConfig.undefined:
+                                    snyk_vulner["source"] = "snyk"
+                                    snyk_vulner["source_url"] = d_url
+                                    snyk_vulner["type"] = source
+                                    if "disclosed" in snyk_vulner:
+                                        if snyk_vulner["disclosed"] == SNYKConfig.undefined:
+                                            snyk_vulner["disclosed"] = timezone.now()
+                                        else:
+                                            snyk_vulner["disclosed"] = dateparser.parse(snyk_vulner["disclosed"])
+                                    else:
+                                        snyk_vulner["disclosed"] = timezone.now()
+                                    if "published" in snyk_vulner:
+                                        if snyk_vulner["published"] == SNYKConfig.undefined:
+                                            snyk_vulner["published"] = timezone.now()
+                                        else:
+                                            snyk_vulner["published"] = dateparser.parse(snyk_vulner["published"])
+                                    else:
+                                        snyk_vulner["published"] = unify_time(timezone.now())
+
+                                    result = self.create_or_update_snyk_vulnertability(snyk_vulner)
+                                    if result == "updated":
+                                        print_debug("Riched end of update")
+                                        continue_work = False
+                                    elif result == "skipped":
+                                        print_debug("Riched end of update")
+                                        continue_work = False
+                                    elif result == "created":
+                                        print_debug("Find new Snyk vulnerability: {}".format(snyk_vulner["header_title"]))
                     page_number += 1
             print_debug("Complete updating {} Snyk vulnerabilities".format(len(created_snyk_vulners)))
+            self.save_status_in_local_status_table(dict(
+                count=count_after,
+                updated=time_string_to_datetime(
+                    unify_time(timezone.now())
+                )
+            ))
             return pack_answer(
                 status=TextMessages.ok.value,
                 message=TextMessages.ok.value,

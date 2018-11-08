@@ -1,6 +1,8 @@
 
 
 class SNYKConfig(object):
+    versions_file_name = "versions_s.txt"
+    source_file_name = "source_s.txt"
     drop_core_table = True
     debug = True
     undefined = "undefined"
