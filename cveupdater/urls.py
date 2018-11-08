@@ -51,3 +51,9 @@ urlpatterns += [
 urlpatterns += [
     path('npm/', include('updater_npm.urls'))
 ]
+
+# SNYK
+
+urlpatterns += [
+    path('snyk/', include('updater_snyk.urls'))
+]

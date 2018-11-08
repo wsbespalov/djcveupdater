@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'updater_cpe',
     'updater_cwe',
     'updater_capec',
-    'updater_npm'
+    'updater_npm',
+    'updater_snyk'
 ]
 
 MIDDLEWARE = [
