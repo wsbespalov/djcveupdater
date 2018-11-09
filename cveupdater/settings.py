@@ -25,7 +25,7 @@ SECRET_KEY = 'xpr85kxn87_q_zf5_gzi(8=^7!3$6uh%%*jg3hdk!%@0cc#^dv'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["0.0.0.0", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'updater_cwe',
     'updater_capec',
     'updater_npm',
-    'updater_snyk'
+    'updater_snyk',
+    'updater_cve'
 ]
 
 MIDDLEWARE = [

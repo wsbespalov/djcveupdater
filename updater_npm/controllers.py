@@ -163,24 +163,30 @@ class NPMController(object):
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
-        obj = STATUS_NPM.objects.filter(name="npm")
+        name = status.get("name", "npm")
+        obj = STATUS_NPM.objects.filter(name=name)
         if obj:
-            return STATUS_NPM.objects.filter(name="npm").update(
+            return STATUS_NPM.objects.filter(name=name).update(
+                status=status.get("status", ""),
                 count=status.get("count", 0),
                 updated=status.get("updated", timezone.now())
             )
         return STATUS_NPM.objects.create(
-            name="npm",
+            name=name,
+            status=status.get("status", ""),
             count=status.get("count", 0),
-            created=make_aware(timezone.now()),
+            created=status.get("created", timezone.now()),
             updated=status.get("updated", timezone.now())
         )
 
     @staticmethod
-    def get_status_from_local_status_table() -> dict:
-        obj = STATUS_NPM.objects.filter(name="npm")
-        if obj:
-            return obj.data
+    def get_status_from_local_status_table(name="npm") -> dict:
+        objects = STATUS_NPM.objects.filter(name=name)
+        if objects:
+            o = objects[0]
+            response = o.data
+            response["exists"] = True
+            return response
         return dict(
             exists=False,
             count=0,
@@ -578,6 +584,7 @@ class NPMController(object):
 
             count_after = self.count_vulnerability_npm_table()
             self.save_status_in_local_status_table(dict(
+                name="npm",
                 count=count_after,
                 updated=time_string_to_datetime(last_modified)
             ))

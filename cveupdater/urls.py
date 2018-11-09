@@ -57,3 +57,9 @@ urlpatterns += [
 urlpatterns += [
     path('snyk/', include('updater_snyk.urls'))
 ]
+
+# CVE
+
+urlpatterns += [
+    path('cve/', include('updater_cve.urls'))
+]

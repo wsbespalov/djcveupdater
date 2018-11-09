@@ -122,24 +122,30 @@ class CPEController(object):
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
-        obj = STATUS_CPE.objects.filter(name="cpe")
+        name = status.get("name", "cpe")
+        obj = STATUS_CPE.objects.filter(name=name)
         if obj:
-            return STATUS_CPE.objects.filter(name="cpe").update(
+            return STATUS_CPE.objects.filter(name=name).update(
+                status=status.get("status", ""),
                 count=status.get("count", 0),
                 updated=status.get("updated", timezone.now())
             )
         return STATUS_CPE.objects.create(
-            name="cpe",
+            name=name,
+            status=status.get("status", ""),
             count=status.get("count", 0),
-            created=timezone.now(),
+            created=status.get("created", timezone.now()),
             updated=status.get("updated", timezone.now())
         )
 
     @staticmethod
-    def get_status_from_local_status_table() -> dict:
-        obj = STATUS_CPE.objects.filter(name="cpe")
-        if obj:
-            return obj.data
+    def get_status_from_local_status_table(name="cpe") -> dict:
+        objects = STATUS_CPE.objects.filter(name=name)
+        if objects:
+            o = objects[0]
+            response = o.data
+            response["exists"] = True
+            return response
         return dict(
             exists=False,
             count=0,
@@ -380,6 +386,7 @@ class CPEController(object):
                 self.create_or_update_cpe_vulnerability(x)
             count_after = self.count_vulnerability_cpe_table()
             self.save_status_in_local_status_table(dict(
+                name="cpe",
                 count=count_after,
                 updated=time_string_to_datetime(last_modified)
             ))
