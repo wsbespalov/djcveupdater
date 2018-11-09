@@ -8,4 +8,4 @@ class CVEConfig(object):
     source = ""
     file_storage_root = 'media'
     cpe_file = ''
-    start_year = 2018
+    start_year = 2017

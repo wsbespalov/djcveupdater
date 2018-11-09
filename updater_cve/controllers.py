@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import dateparser
 
@@ -12,6 +13,15 @@ from .models import VULNERABILITY_CVE
 from .models import VULNERABILITY_CVE_NEW
 from .models import VULNERABILITY_CVE_MODIFIED
 
+from .utils import get_meta_info
+from .utils import download_nvd_file_by_year
+from .utils import load_cve_items_from_nvd_zipped_file
+
+from .cveitem import CVEItem
+
+LOCAL_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+nvd_directory_path = os.path.join(LOCAL_BASE_DIR, CVEConfig.file_storage_root)
 
 def print_debug(message):
     if CVEConfig.debug:
@@ -134,30 +144,44 @@ class CVEController():
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
-        obj = STATUS_CVE.objects.filter(name="cpe")
+        name = status.get("name", "cve")
+        obj = STATUS_CVE.objects.filter(name=name)
         if obj:
-            return STATUS_CVE.objects.filter(name="cpe").update(
+            return STATUS_CVE.objects.filter(name=name).update(
+                status=status.get("status", ""),
                 count=status.get("count", 0),
                 updated=status.get("updated", timezone.now())
             )
         return STATUS_CVE.objects.create(
-            name="cpe",
+            name=name,
+            status=status.get("status", ""),
             count=status.get("count", 0),
-            created=timezone.now(),
+            created=status.get("created", timezone.now()),
             updated=status.get("updated", timezone.now())
         )
 
     @staticmethod
-    def get_status_from_local_status_table() -> dict:
-        obj = STATUS_CVE.objects.filter(name="cpe")
-        if obj:
-            return obj.data
+    def get_status_from_local_status_table(name="cve") -> dict:
+        objects = STATUS_CVE.objects.filter(name=name)
+        if objects:
+            o = objects[0]
+            response = o.data
+            response["exists"] = True
+            return response
         return dict(
             exists=False,
             count=0,
+            name=name,
+            status="",
             created=timezone.now(),
             updated=timezone.now()
         )
+
+    @staticmethod
+    def delete_row_from_local_status_table_by_name(name):
+        obj = STATUS_CVE.objects.filter(name=name)
+        if obj:
+            return obj.delete()
 
     @staticmethod
     def save_status_in_global_status_table(status: dict):
@@ -232,5 +256,78 @@ class CVEController():
             self.clear_vulnerability_cpe_table()
         self.clear_vulnerability_cpe_new_table()
         self.clear_vulnerability_cpe_modified_table()
+        count_before = count_after = self.count_vulnerability_cve_table()
         start_year = CVEConfig.start_year
         current_year = timezone.now().year
+        if self.count_vulnerability_cve_table() == 0:
+            for year in range(start_year, current_year + 1):
+                filename = "nvdcve-1.0-{}.json.zip".format(year)
+                self.delete_row_from_local_status_table_by_name(filename)
+        for year in range(start_year, current_year + 1):
+            filename = "nvdcve-1.0-{}.json.zip".format(year)
+            print_debug("process file: {}".format(filename))
+            full_path = os.path.join(nvd_directory_path, filename)
+            stat = self.get_status_from_local_status_table(filename)
+            stat_status = stat.get("status", "")
+            stat_ts = stat.get("updated", timezone.now())
+            (meta, success) = get_meta_info(filename)
+            if success:
+                ts_meta_string = meta.get("last_modified", None)
+                if ts_meta_string is not None:
+                    ts_meta = ts_meta_string
+                else:
+                    ts_meta = timezone.now()
+                size = meta.get("size", 0)
+                if not stat.get("exists", False):
+                    stat_status = "updating"
+                    self.save_status_in_local_status_table(dict(
+                        name=filename,
+                        status="modified",
+                        count=size
+                    ))
+                else:
+                    if stat_status != "updating":
+                        if ts_meta != stat_ts:
+                            self.save_status_in_local_status_table(dict(
+                                name=filename,
+                                status="modified",
+                                updated=ts_meta
+                            ))
+                        else:
+                            self.save_status_in_local_status_table(dict(
+                                name=filename,
+                                status="not modified",
+                                updated=ts_meta
+                            ))
+            else:
+                return pack_answer(
+                    status=TextMessages.error.value,
+                    message=TextMessages.cant_download_file.value,
+                    cve_cnt_before=count_before,
+                    cve_cnt_after=count_after,
+                    new_cnt=0,
+                    modified_cnt=0
+                )
+            if stat_status == "not modified":
+                print_debug("File {} was not modified - skip it")
+            elif stat_status == "modified" or stat_status == "updating":
+                self.save_status_in_local_status_table(dict(
+                    name=filename,
+                    status="updating",
+                    updated=ts_meta
+                ))
+                if download_nvd_file_by_year(year):
+                    cve_items_from_file, file_data_timestamp = load_cve_items_from_nvd_zipped_file(full_path)
+                    for value in cve_items_from_file:
+                        cve = CVEItem(value).to_json()
+                        cve["cvss_time"] = dateparser.parse(file_data_timestamp)
+                        self.create_or_update_cve_vulnerability(cve)
+        count_after = self.count_vulnerability_cve_table()
+        return pack_answer(
+            status=TextMessages.ok.value,
+            message=TextMessages.ok.value,
+            cve_cnt_before=count_before,
+            cve_cnt_after=count_after,
+            new_cnt=self.count_vulnerability_cve_new_table(),
+            modified_cnt=self.count_vulnerability_cve_modified_table()
+        )

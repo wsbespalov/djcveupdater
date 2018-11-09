@@ -166,24 +166,29 @@ class SNYKController(object):
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
-        obj = STATUS_SNYK.objects.filter(name="capec")
+        name = status.get("name", "snyk")
+        obj = STATUS_SNYK.objects.filter(name=name)
         if obj:
-            return STATUS_SNYK.objects.filter(name="capec").update(
+            return STATUS_SNYK.objects.filter(name=name).update(
+                status=status.get("status", ""),
                 count=status.get("count", 0),
                 updated=status.get("updated", timezone.now())
             )
         return STATUS_SNYK.objects.create(
-            name="capec",
+            name=name,
             count=status.get("count", 0),
-            created=timezone.now(),
+            created=status.get("created", timezone.now()),
             updated=status.get("updated", timezone.now())
         )
 
     @staticmethod
-    def get_status_from_local_status_table() -> dict:
-        obj = STATUS_SNYK.objects.filter(name="capec")
-        if obj:
-            return obj.data
+    def get_status_from_local_status_table(name="snyk") -> dict:
+        objects = STATUS_SNYK.objects.filter(name=name)
+        if objects:
+            o = objects[0]
+            response = o.data
+            response["exists"] = True
+            return response
         return dict(
             exists=False,
             count=0,
@@ -837,6 +842,7 @@ class SNYKController(object):
                     page_number += 1
             print_debug("Complete updating {} Snyk vulnerabilities".format(len(created_snyk_vulners)))
             self.save_status_in_local_status_table(dict(
+                name="snyk",
                 count=count_after,
                 updated=time_string_to_datetime(
                     unify_time(timezone.now())
