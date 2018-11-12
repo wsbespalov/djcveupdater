@@ -3,6 +3,7 @@ from datetime import datetime
 import dateparser
 
 from django.utils import timezone
+from django.db import transaction
 
 from .text_messages import TextMessages
 
@@ -10,8 +11,6 @@ from .configurations import CVEConfig
 
 from .models import STATUS_CVE
 from .models import VULNERABILITY_CVE
-from .models import VULNERABILITY_CVE_NEW
-from .models import VULNERABILITY_CVE_MODIFIED
 
 from .utils import get_meta_info
 from .utils import download_nvd_file_by_year
@@ -22,6 +21,11 @@ from .cveitem import CVEItem
 LOCAL_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 nvd_directory_path = os.path.join(LOCAL_BASE_DIR, CVEConfig.file_storage_root)
+
+MODIFICATION_CLEAR = 0
+MODIFICATION_NEW = 1
+MODIFICATION_MODIFIED = 2
+
 
 def print_debug(message):
     if CVEConfig.debug:
@@ -49,60 +53,60 @@ def pack_answer(
 
 
 class CVEController():
-
-
     @staticmethod
     def clear_vulnerability_cpe_table():
         for x in VULNERABILITY_CVE.objects.all().iterator():
             x.delete()
 
     @staticmethod
-    def clear_vulnerability_cpe_new_table():
-        for x in VULNERABILITY_CVE_NEW.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_cve_all_marks():
+        entries = VULNERABILITY_CVE.objects.select_for_update().all().defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
-    def clear_vulnerability_cpe_modified_table():
-        for x in VULNERABILITY_CVE_MODIFIED.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_cve_new_marks():
+        entries = VULNERABILITY_CVE.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
+
+    @staticmethod
+    def clear_vulnerability_cve_modified_marks():
+        entries = VULNERABILITY_CVE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
     def count_vulnerability_cve_table():
         return VULNERABILITY_CVE.objects.count()
 
     @staticmethod
-    def count_vulnerability_cve_new_table():
-        return VULNERABILITY_CVE_NEW.objects.count()
+    def count_vulnerability_cve_new_marked():
+        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_NEW).count()
 
     @staticmethod
-    def count_vulnerability_cve_modified_table():
-        return VULNERABILITY_CVE_MODIFIED.objects.count()
+    def count_vulnerability_cve_modified_marked():
+        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_MODIFIED).count()
+
+    @staticmethod
+    def get_vulnerability_cve_new():
+        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_NEW)
+
+    @staticmethod
+    def get_vulnerability_cve_modified():
+        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_MODIFIED)
 
     @staticmethod
     def append_cve_in_vulnerability_cve_table(cve):
-        return VULNERABILITY_CVE.objects.create(
-            cve_id=cve["cve_id"],
-            cwe=cve["cwe"],
-            references=cve["references"],
-            vulnerable_configuration=cve["vulnerable_configuration"],
-            data_type=cve["data_type"],
-            data_version=cve["data_version"],
-            data_format=cve["data_format"],
-            description=cve["description"],
-            published=cve["published"],
-            modified=cve["modified"],
-            access=cve["access"],
-            impact=cve["impact"],
-            vector_string=cve["vector_string"],
-            cvss_time=cve["cvss_time"],
-            cvss=cve["cvss"]
-        )
-
-    @staticmethod
-    def append_cve_in_vulnerability_cve_new_table(cve):
-        objects = VULNERABILITY_CVE_NEW.objects.filter(cve_id=cve["cve_id"])
-        if len(objects) == 0:
-            return VULNERABILITY_CVE_NEW.objects.create(
+        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).first()
+        if vulner is None:
+            return VULNERABILITY_CVE.objects.create(
                 cve_id=cve["cve_id"],
                 cwe=cve["cwe"],
                 references=cve["references"],
@@ -117,30 +121,23 @@ class CVEController():
                 impact=cve["impact"],
                 vector_string=cve["vector_string"],
                 cvss_time=cve["cvss_time"],
-                cvss=cve["cvss"]
+                cvss=cve["cvss"],
+                modification=MODIFICATION_NEW
             )
 
     @staticmethod
-    def append_cve_in_vulnerability_cve_modified_table(cve):
-        objects = VULNERABILITY_CVE_MODIFIED.objects.filter(cve_id=cve["cve_id"])
-        if len(objects) == 0:
-            return VULNERABILITY_CVE_MODIFIED.objects.create(
-                cve_id=cve["cve_id"],
-                cwe=cve["cwe"],
-                references=cve["references"],
-                vulnerable_configuration=cve["vulnerable_configuration"],
-                data_type=cve["data_type"],
-                data_version=cve["data_version"],
-                data_format=cve["data_format"],
-                description=cve["description"],
-                published=cve["published"],
-                modified=cve["modified"],
-                access=cve["access"],
-                impact=cve["impact"],
-                vector_string=cve["vector_string"],
-                cvss_time=cve["cvss_time"],
-                cvss=cve["cvss"]
-            )
+    def mark_cve_in_vulnerability_cve_table_as_new(cve):
+        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_NEW
+            vulner.save()
+
+    @staticmethod
+    def mark_cve_in_vulnerability_cve_table_as_modified(cve):
+        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_MODIFIED
+            vulner.save()
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
@@ -212,34 +209,33 @@ class CVEController():
 
     @staticmethod
     def update_cve_in_cve_table(cve):
-        return VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).update(
-            cve_id=cve["cve_id"],
-            cwe=cve["cwe"],
-            references=cve["references"],
-            vulnerable_configuration=cve["vulnerable_configuration"],
-            data_type=cve["data_type"],
-            data_version=cve["data_version"],
-            data_format=cve["data_format"],
-            description=cve["description"],
-            published=cve["published"],
-            modified=cve["modified"],
-            access=cve["access"],
-            impact=cve["impact"],
-            vector_string=cve["vector_string"],
-            cvss_time=cve["cvss_time"],
-            cvss=cve["cvss"]
-        )
+        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).first()
+        if vulner is not None:
+            vulner.cve_id=cve["cve_id"],
+            vulner.cwe=cve["cwe"],
+            vulner.references=cve["references"],
+            vulner.vulnerable_configuration=cve["vulnerable_configuration"],
+            vulner.data_type=cve["data_type"],
+            vulner.data_version=cve["data_version"],
+            vulner.data_format=cve["data_format"],
+            vulner.description=cve["description"],
+            vulner.published=cve["published"],
+            vulner.modified=cve["modified"],
+            vulner.access=cve["access"],
+            vulner.impact=cve["impact"],
+            vulner.vector_string=cve["vector_string"],
+            vulner.cvss_time=cve["cvss_time"],
+            vulner.cvss=cve["cvss"]
+            vulner.modification=MODIFICATION_MODIFIED
+            vulner.save()
 
     def create_or_update_cve_vulnerability(self, cve):
-        objects = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"])
-        if len(objects) == 0:
+        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).first()
+        if vulner is None:
             self.append_cve_in_vulnerability_cve_table(cve)
-            self.append_cve_in_vulnerability_cve_new_table(cve)
         else:
-            o = objects[0]
-            if self.check_if_cve_item_changed(o, cve):
+            if self.check_if_cve_item_changed(vulner.data, cve):
                 self.update_cve_in_cve_table(cve)
-                self.append_cve_in_vulnerability_cve_modified_table(cve=cve)
 
     def stats(self):
         return pack_answer(
@@ -247,22 +243,24 @@ class CVEController():
             message=TextMessages.ok.value,
             cve_cnt_before=self.count_vulnerability_cve_table(),
             cve_cnt_after=self.count_vulnerability_cve_table(),
-            new_cnt=self.count_vulnerability_cve_new_table(),
-            modified_cnt=self.count_vulnerability_cve_modified_table()
+            new_cnt=self.count_vulnerability_cve_new_marked(),
+            modified_cnt=self.count_vulnerability_cve_modified_marked()
         )
 
     def update(self):
         if CVEConfig.drop_core_table:
             self.clear_vulnerability_cpe_table()
-        self.clear_vulnerability_cpe_new_table()
-        self.clear_vulnerability_cpe_modified_table()
+        self.clear_vulnerability_cve_all_marks()
+        print_debug("create parsers")
         count_before = count_after = self.count_vulnerability_cve_table()
         start_year = CVEConfig.start_year
         current_year = timezone.now().year
         if self.count_vulnerability_cve_table() == 0:
             for year in range(start_year, current_year + 1):
+                print_debug("clear year: {}".format(year))
                 filename = "nvdcve-1.0-{}.json.zip".format(year)
                 self.delete_row_from_local_status_table_by_name(filename)
+        count = 0
         for year in range(start_year, current_year + 1):
             filename = "nvdcve-1.0-{}.json.zip".format(year)
             print_debug("process file: {}".format(filename))
@@ -321,13 +319,17 @@ class CVEController():
                     for value in cve_items_from_file:
                         cve = CVEItem(value).to_json()
                         cve["cvss_time"] = dateparser.parse(file_data_timestamp)
+                        print_debug("process cve # {} with ID: {}".format(count, cve["cve_id"]))
+                        count += 1
+
                         self.create_or_update_cve_vulnerability(cve)
+
         count_after = self.count_vulnerability_cve_table()
         return pack_answer(
             status=TextMessages.ok.value,
             message=TextMessages.ok.value,
             cve_cnt_before=count_before,
             cve_cnt_after=count_after,
-            new_cnt=self.count_vulnerability_cve_new_table(),
-            modified_cnt=self.count_vulnerability_cve_modified_table()
+            new_cnt=self.count_vulnerability_cve_new_marked(),
+            modified_cnt=self.count_vulnerability_cve_modified_marked()
         )
