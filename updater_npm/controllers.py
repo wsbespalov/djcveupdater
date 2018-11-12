@@ -236,7 +236,7 @@ class NPMController(object):
 
     def create_or_update_npm_vulnerability(self, npm):
         vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm['npm_id']).first()
-        if vulner is not None:
+        if vulner is None:
             self.append_npm_in_vulnerability_npm_table(npm)
         else:
             if self.check_if_npm_item_changed(vulner.data, npm):
