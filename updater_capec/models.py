@@ -63,7 +63,7 @@ class VULNERABILITY_CAPEC(models.Model):
     objects = models.Manager()
 
     class Meta:
-        ordering = ['capec_id']
+        ordering = ['capec_id', "modification"]
         verbose_name = 'VULNERABILITY_CAPEC'
         verbose_name_plural = 'VULNERABILITY_CAPEC'
 

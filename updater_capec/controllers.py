@@ -5,7 +5,6 @@ from django.db import transaction
 
 from .utils import upload_file
 from .utils import read_file
-from .utils import time_string_to_datetime
 
 from .handlers import CAPECHandler
 
@@ -63,7 +62,7 @@ class CAPECController(object):
 				entry.save()
 
 	@staticmethod
-	def clear_vulnerability_capec_new_mark():
+	def clear_vulnerability_capec_new_marks():
 		entries = VULNERABILITY_CAPEC.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
 		with transaction.atomic():
 			for entry in entries:
@@ -71,7 +70,7 @@ class CAPECController(object):
 				entry.save()
 
 	@staticmethod
-	def clear_vulnerability_capec_modified_mark():
+	def clear_vulnerability_capec_modified_marks():
 		entries = VULNERABILITY_CAPEC.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
 		with transaction.atomic():
 			for entry in entries:
@@ -91,6 +90,14 @@ class CAPECController(object):
 		return VULNERABILITY_CAPEC.objects.filter(modification=MODIFICATION_MODIFIED).count()
 
 	@staticmethod
+	def get_vulnerability_capec_new():
+		return VULNERABILITY_CAPEC.objects.filter(modification=MODIFICATION_NEW)
+
+	@staticmethod
+	def get_vulnerability_capec_modified():
+		return VULNERABILITY_CAPEC.objects.filter(modification=MODIFICATION_MODIFIED)
+
+	@staticmethod
 	def append_capec_in_vulnerability_capec_table(capec: dict):
 		vulner = VULNERABILITY_CAPEC.objects.filter(capec_id=capec["capec_id"]).first()
 		if vulner is None:
@@ -100,7 +107,8 @@ class CAPECController(object):
 				summary=capec["summary"],
 				prerequisites=capec["prerequisites"],
 				solutions=capec["solutions"],
-				related_weakness=capec["related_weakness"]
+				related_weakness=capec["related_weakness"],
+				modification=MODIFICATION_NEW
 			)
 
 	@staticmethod
@@ -177,18 +185,16 @@ class CAPECController(object):
 			vulner.prerequisites=capec["prerequisites"],
 			vulner.solutions=capec["solutions"],
 			vulner.related_weakness=capec["related_weakness"]
+			vulner.modification=MODIFICATION_MODIFIED
 			vulner.save()
 
 	def create_or_update_capec_vulnertability(self, capec: dict):
-		objects = VULNERABILITY_CAPEC.objects.filter(capec_id=capec['capec_id'])
-		if len(objects) == 0:
+		vulner = VULNERABILITY_CAPEC.objects.filter(capec_id=capec['capec_id']).first()
+		if vulner is None:
 			self.append_capec_in_vulnerability_capec_table(capec)
-			self.mark_capec_in_vulnerability_capec_table_as_new(capec)
 		else:
-			o = objects[0].data
-			if self.check_if_capec_item_changed(o, capec):
+			if self.check_if_capec_item_changed(vulner.data, capec):
 				self.update_capec_in_capec_table(capec)
-				self.mark_capec_in_vulnerability_capec_table_as_modified(capec)
 
 	def stats(self):
 		return pack_answer(
@@ -203,8 +209,7 @@ class CAPECController(object):
 	def update(self):
 		if CAPECConfig.drop_core_table:
 			self.clear_vulnerability_capec_table()
-		self.clear_vulnerability_capec_new_mark()
-		self.clear_vulnerability_capec_modified_mark()
+		self.clear_vulnerability_capec_all_marks()
 		print_debug("create parsers")
 		count_before = count_after = self.count_vulnerability_capec()
 		parser = make_parser()
