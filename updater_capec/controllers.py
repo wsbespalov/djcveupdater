@@ -234,9 +234,9 @@ class CAPECController(object):
 
             count = 0
             for capec in capec_handler.capec:
-                print_debug('processing: {}'.format(count))
-                count += 1
                 capec['capec_id'] = 'CAPEC-{}'.format(capec['id'])
+                print_debug('processing CAPEC # {} with ID: {}'.format(count, capec["capec_id"]))
+                count += 1
                 related_weakness = capec.get("related_weakness", [])
                 if related_weakness:
                     for index, value in enumerate(related_weakness):

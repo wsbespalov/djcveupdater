@@ -244,7 +244,7 @@ class CWEController(object):
                 cwe['description_summary'] = cwe['description_summary'].replace("\t\t\t\t\t", " ")
 
                 self.create_or_update_cwe_vulnerability(cwe)
-                
+
             count_after = self.count_vulnerability_cwe_table()
             self.save_status_in_local_status_table(dict(
                 name="cwe",

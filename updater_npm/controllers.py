@@ -4,13 +4,12 @@ from re import findall
 
 from django.utils import timezone
 from django.utils.timezone import make_aware
+from django.db import transaction
 
 from .text_messages import TextMessages
 
 from .models import STATUS_NPM
 from .models import VULNERABILITY_NPM
-from .models import VULNERABILITY_NPM_NEW
-from .models import VULNERABILITY_NPM_MODIFIED
 
 from .configurations import NPMConfig
 
@@ -19,15 +18,17 @@ from .utils import read_file
 from .utils import unify_time
 from .utils import time_string_to_datetime
 
-import logging
-logger = logging.getLogger(__name__)
-
 LOCAL_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 UNDEFINED = NPMConfig.undefined
 
+MODIFICATION_CLEAR = 0
+MODIFICATION_NEW = 1
+MODIFICATION_MODIFIED = 2
+
 versions_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root), NPMConfig.versions_file_name)
 source_file_path = os.path.join(os.path.join(LOCAL_BASE_DIR, NPMConfig.file_storage_root), NPMConfig.source_file_name)
+
 
 def print_debug(message):
     if NPMConfig.debug:
@@ -63,30 +64,53 @@ class NPMController(object):
             x.delete()
 
     @staticmethod
-    def clear_vulnerability_npm_new_table():
-        for x in VULNERABILITY_NPM_NEW.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_npm_all_marks():
+        entries = VULNERABILITY_NPM.objects.select_for_update().all().defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
-    def clear_vulnerability_npm_modified_table():
-        for x in VULNERABILITY_NPM_MODIFIED.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_npm_new_marks():
+        entries = VULNERABILITY_NPM.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
-    def count_vulnerability_npm_table():
+    def clear_vulnerability_npm_modified_marks():
+        entries = VULNERABILITY_NPM.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
+
+    @staticmethod
+    def count_vulnerability_npm():
         return VULNERABILITY_NPM.objects.count()
 
     @staticmethod
-    def count_vulnerability_npm_new_table():
-        return VULNERABILITY_NPM_NEW.objects.count()
+    def count_vulnerability_npm_new_marked():
+        return VULNERABILITY_NPM.objects.filter(modification=MODIFICATION_NEW).count()
 
     @staticmethod
-    def count_vulnerability_npm_modified_table():
-        return VULNERABILITY_NPM_MODIFIED.objects.count()
+    def count_vulnerability_npm_modified_marked():
+        return VULNERABILITY_NPM.objects.filter(modification=MODIFICATION_MODIFIED).count()
+
+    @staticmethod
+    def get_vulnerability_npm_new():
+        return VULNERABILITY_NPM.objects.filter(modification=MODIFICATION_NEW)
+
+    @staticmethod
+    def get_vulnerability_npm_modified():
+        return VULNERABILITY_NPM.objects.filter(modification=MODIFICATION_MODIFIED)
 
     @staticmethod
     def append_npm_in_vulnerability_npm_table(npm):
-        return VULNERABILITY_NPM.objects.create(
+        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).first()
+        if vulner is None:
             npm_id=npm["npm_id"],
             created=npm["created"],
             updated=npm["updated"],
@@ -105,61 +129,22 @@ class NPMController(object):
             cvss_vector=npm["cvss_vector"],
             cvss_score=npm["cvss_score"],
             cwe=npm["cwe"],
-            source=npm["source"]
-        )
+            source=npm["source"],
+            modification=MODIFICATION_NEW
 
     @staticmethod
-    def append_npm_in_vulnerability_npm_new_table(npm):
-        objects = VULNERABILITY_NPM_NEW.objects.filter(npm_id=npm["npm_id"])
-        if len(objects) == 0:
-            return VULNERABILITY_NPM_NEW.objects.create(
-                npm_id=npm["npm_id"],
-                created=npm["created"],
-                updated=npm["updated"],
-                title=npm["title"],
-                author=npm["author"],
-                module_name=npm["module_name"],
-                published_date=npm["published_date"],
-                cves=npm["cves"],
-                vulnerable_versions=npm["vulnerable_versions"],
-                slug=npm["slug"],
-                overview=npm["overview"],
-                recommendation=npm["recommendation"],
-                references=npm["references"],
-                legacy_slug=npm["legacy_slug"],
-                allowed_scopes=npm["allowed_scopes"],
-                cvss_vector=npm["cvss_vector"],
-                cvss_score=npm["cvss_score"],
-                cwe=npm["cwe"],
-                source=npm["source"]
-            )
+    def mark_npm_in_vulnerability_npm_table_as_new(npm):
+        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_NEW
+            vulner.save()
 
     @staticmethod
-    def append_npm_in_vulnerability_npm_nmodified_table(npm):
-        objects = VULNERABILITY_NPM_MODIFIED.objects.filter(npm_id=npm["npm_id"])
-        if len(objects) == 0:
-            return VULNERABILITY_NPM_MODIFIED.objects.create(
-                npm_id=npm["npm_id"],
-                created=npm["created"],
-                updated=npm["updated"],
-                title=npm["title"],
-                author=npm["author"],
-                module_name=npm["module_name"],
-                published_date=npm["published_date"],
-                cves=npm["cves"],
-                vulnerable_versions=npm["vulnerable_versions"],
-                slug=npm["slug"],
-                overview=npm["overview"],
-                recommendation=npm["recommendation"],
-                references=npm["references"],
-                legacy_slug=npm["legacy_slug"],
-                allowed_scopes=npm["allowed_scopes"],
-                cvss_vector=npm["cvss_vector"],
-                cvss_score=npm["cvss_score"],
-                cwe=npm["cwe"],
-                source=npm["source"]
-            )
-
+    def mark_npm_in_vulnerability_npm_table_as_modified(npm):
+        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_MODIFIED
+            vulner.save()
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
@@ -227,37 +212,35 @@ class NPMController(object):
 
     @staticmethod
     def update_npm_in_npm_table(npm):
-        return VULNERABILITY_NPM.objects.filter(id=npm["id"]).update(
-            created=npm["created"],
-            updated=npm["updated"],
-            title=npm["title"],
-            author=npm["author"],
-            module_name=npm["module_name"],
-            published_date=npm["published_date"],
-            cves=npm["cves"],
-            vulnerable_versions=npm["vulnerable_versions"],
-            slug=npm["slug"],
-            overview=npm["overview"],
-            recommendation=npm["recommendation"],
-            references=npm["references"],
-            legacy_slug=npm["legacy_slug"],
-            allowed_scopes=npm["allowed_scopes"],
-            cvss_vector=npm["cvss_vector"],
-            cvss_score=npm["cvss_score"],
-            cwe=npm["cwe"],
-            source=npm["source"]
-        )
+        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).first()
+        if vulner is not None:
+            vulner.created=npm["created"]
+            vulner.updated=npm["updated"]
+            vulner.title=npm["title"]
+            vulner.author=npm["author"]
+            vulner.module_name=npm["module_name"]
+            vulner.published_date=npm["published_date"]
+            vulner.cves=npm["cves"]
+            vulner.vulnerable_versions=npm["vulnerable_versions"]
+            vulner.slug=npm["slug"]
+            vulner.overview=npm["overview"]
+            vulner.recommendation=npm["recommendation"]
+            vulner.references=npm["references"]
+            vulner.legacy_slug=npm["legacy_slug"]
+            vulner.allowed_scopes=npm["allowed_scopes"]
+            vulner.cvss_vector=npm["cvss_vector"]
+            vulner.cvss_score=npm["cvss_score"]
+            vulner.cwe=npm["cwe"]
+            vulner.source=npm["source"]
+            vulner.save()
 
     def create_or_update_npm_vulnerability(self, npm):
-        objects = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"])
-        if len(objects) == 0:
+        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm['npm_id']).first()
+        if vulner is not None:
             self.append_npm_in_vulnerability_npm_table(npm)
-            self.append_npm_in_vulnerability_npm_new_table(npm)
         else:
-            o2 = objects[0].data
-            if self.check_if_npm_item_changed(o2, npm):
+            if self.check_if_npm_item_changed(vulner.data, npm):
                 self.update_npm_in_npm_table(npm)
-                self.append_npm_in_vulnerability_npm_nmodified_table(npm)
 
     @staticmethod
     def validate_cwe_field(cwe_field):
@@ -520,18 +503,19 @@ class NPMController(object):
         return pack_answer(
             status=TextMessages.ok.value,
             message=TextMessages.ok.value,
-            npm_cnt_before=self.count_vulnerability_npm_table(),
-            npm_cnt_after=self.count_vulnerability_npm_table(),
-            new_cnt=self.count_vulnerability_npm_new_table(),
-            modified_cnt=self.count_vulnerability_npm_modified_table()
+            npm_cnt_before=self.count_vulnerability_npm(),
+            npm_cnt_after=self.count_vulnerability_npm(),
+            new_cnt=self.count_vulnerability_npm_new_marked(),
+            modified_cnt=self.count_vulnerability_npm_modified_marked()
         )
 
     def update(self):
         if NPMConfig.drop_core_table:
             self.clear_vulnerability_npm_table()
-        self.clear_vulnerability_npm_new_table()
-        self.clear_vulnerability_npm_modified_table()
-        count_before = count_after = self.count_vulnerability_npm_table()
+        self.clear_vulnerability_npm_all_marks()
+        print_debug("create parsers")
+        count_before = count_after = self.count_vulnerability_npm()
+        print_debug("download file")
         (file_path, success, last_modified, size, fmt) = upload_file()
         if success and file_path != '':
             # FIXME: Make last_modified comparison
@@ -548,8 +532,6 @@ class NPMController(object):
             npms = f["results"]
             count = 0
             for npm_item in npms:
-                print_debug('processing: {}'.format(count))
-                count += 1
                 npm_item = self.validate_npm_vulnerability_fields(npm_item)
                 npm = dict()
                 if npm_item is not None:
@@ -580,9 +562,12 @@ class NPMController(object):
                     npm["cwe"] = npm_item['cwe']
                     npm["source"] = self.get_npm_module_source(npm_item['module_name'])
 
+                    print_debug('processing NPM # {} with ID: {}'.format(count, npm["npm_id"]))
+                    count += 1
+
                     self.create_or_update_npm_vulnerability(npm=npm)
 
-            count_after = self.count_vulnerability_npm_table()
+            count_after = self.count_vulnerability_npm()
             self.save_status_in_local_status_table(dict(
                 name="npm",
                 count=count_after,
@@ -594,8 +579,8 @@ class NPMController(object):
                 message=TextMessages.npm_updated.value,
                 npm_cnt_before=count_before,
                 npm_cnt_after=count_after,
-                new_cnt=self.count_vulnerability_npm_new_table(),
-                modified_cnt=self.count_vulnerability_npm_modified_table()
+                new_cnt=self.count_vulnerability_npm_new_marked(),
+                modified_cnt=self.count_vulnerability_npm_modified_marked()
             )
         return pack_answer(
             status=TextMessages.error.value,
