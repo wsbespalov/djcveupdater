@@ -1,8 +1,10 @@
 import os
+import pytz
 from datetime import datetime
 import dateparser
 
 from django.utils import timezone
+from django.utils.timezone import make_aware
 from django.db import transaction
 
 from .text_messages import TextMessages
@@ -318,6 +320,8 @@ class CVEController():
                     cve_items_from_file, file_data_timestamp = load_cve_items_from_nvd_zipped_file(full_path)
                     for value in cve_items_from_file:
                         cve = CVEItem(value).to_json()
+                        cve["published"] = make_aware(cve["published"])
+                        cve["modified"] = make_aware(cve["modified"])
                         cve["cvss_time"] = dateparser.parse(file_data_timestamp)
                         print_debug("process cve # {} with ID: {}".format(count, cve["cve_id"]))
                         count += 1

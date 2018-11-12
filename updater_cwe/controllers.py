@@ -231,7 +231,8 @@ class CWEController(object):
             self.save_status_in_local_status_table(dict(
                 name="cwe",
                 count=count_after,
-                updated=time_string_to_datetime(last_modified)
+                updated=last_modified,
+                status="updated"
             ))
             return pack_answer(
                 status=TextMessages.ok.value,

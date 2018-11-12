@@ -251,7 +251,8 @@ class CAPECController(object):
 			self.save_status_in_local_status_table(dict(
 				name="capec",
 				count=count_after,
-				updated=last_modified
+				updated=last_modified,
+                status="updated"
 			))
 			print_debug("complete")
 			return pack_answer(
