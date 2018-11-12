@@ -41,7 +41,7 @@ def to_string_formatted_cpe(cpe, autofill=False):
     return cpe
 
 
-def upload_file():
+def upload_file() -> (str, bool, datetime, int, str):
     """
     Upload file from Internet resource
     :return:
