@@ -101,7 +101,7 @@ class CVEController():
     @staticmethod
     def append_cve_in_vulnerability_cve_new_table(cve):
         objects = VULNERABILITY_CVE_NEW.objects.filter(cve_id=cve["cve_id"])
-        if len(objects):
+        if len(objects) == 0:
             return VULNERABILITY_CVE_NEW.objects.create(
                 cve_id=cve["cve_id"],
                 cwe=cve["cwe"],
@@ -123,7 +123,7 @@ class CVEController():
     @staticmethod
     def append_cve_in_vulnerability_cve_modified_table(cve):
         objects = VULNERABILITY_CVE_MODIFIED.objects.filter(cve_id=cve["cve_id"])
-        if len(objects):
+        if len(objects) == 0:
             return VULNERABILITY_CVE_MODIFIED.objects.create(
                 cve_id=cve["cve_id"],
                 cwe=cve["cwe"],
