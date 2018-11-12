@@ -115,6 +115,6 @@ class VULNERABILITY_CVE(models.Model):
         return data
 
     class Meta:
-        ordering = ["cve_id"]
+        ordering = ["cve_id", "modification"]
         verbose_name = "VULNERABILITY_CVE"
         verbose_name_plural = "VULNERABILITY_CVES"
