@@ -240,9 +240,12 @@ class NPMController(object):
         vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm['npm_id']).first()
         if vulner is None:
             self.append_npm_in_vulnerability_npm_table(npm)
+            return "created"
         else:
             if self.check_if_npm_item_changed(vulner.data, npm):
                 self.update_npm_in_npm_table(npm)
+                return "updated"
+            return "skipped"
 
     @staticmethod
     def validate_cwe_field(cwe_field):

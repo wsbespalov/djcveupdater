@@ -1,19 +1,15 @@
 import os
 import re
-import sys
-import time
-import json
 import dateparser
 from datetime import datetime
 
 from django.utils import timezone
+from django.db import transaction
 from django.utils.timezone import make_aware
 
-from lxml import html
 from lxml.cssselect import CSSSelector
 from dateutil import parser
 
-from .utils import set_default
 from .utils import create_url
 from .utils import startswith
 from .utils import find_between
@@ -22,15 +18,16 @@ from .utils import download_page_from_url
 from .utils import time_string_to_datetime
 from .utils import unify_time
 
-
-from .models import STATUS_SNYK
-from .models import VULNERABILITY_SNYK
-from .models import VULNERABILITY_SNYK_NEW
-from .models import VULNERABILITY_SNYK_MODIFIED
-
 from .text_messages import TextMessages
 
 from .configurations import SNYKConfig
+
+from .models import STATUS_SNYK
+from .models import VULNERABILITY_SNYK
+
+MODIFICATION_CLEAR = 0
+MODIFICATION_NEW = 1
+MODIFICATION_MODIFIED = 2
 
 undefined = SNYKConfig.undefined
 
@@ -71,58 +68,59 @@ def pack_answer(
 class SNYKController(object):
     
     @staticmethod
-    def __clear_vulneranility_snyk_table():
+    def clear_vulneranility_snyk_table():
         for x in VULNERABILITY_SNYK.objects.all().iterator():
             x.delete()
 
     @staticmethod
-    def clear_vulnerability_snyk_new_table():
-        for x in VULNERABILITY_SNYK_NEW.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_snyk_all_marks():
+        entries = VULNERABILITY_SNYK.objects.select_for_update().all().defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
-    def clear_vulnerability_snyk_modified_table():
-        for x in VULNERABILITY_SNYK_MODIFIED.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_snyk_new_marks():
+        entries = VULNERABILITY_SNYK.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
+
+    @staticmethod
+    def clear_vulnerability_snyk_modified_marks():
+        entries = VULNERABILITY_SNYK.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
     def count_vulnerability_snyk_table():
         return VULNERABILITY_SNYK.objects.count()
 
     @staticmethod
-    def count_vulnerability_snyk_new_tabele():
-        return VULNERABILITY_SNYK_NEW.objects.count()
+    def count_vulnerability_snyk_new_marked():
+        return VULNERABILITY_SNYK.objects.filter(modification=MODIFICATION_NEW).count()
 
     @staticmethod
-    def count_vulnerability_snyk_modified_table():
-        return VULNERABILITY_SNYK_MODIFIED.objects.count()
+    def count_vulnerability_snyk_modified_marked():
+        return VULNERABILITY_SNYK.objects.filter(modification=MODIFICATION_MODIFIED).count()
+
+    @staticmethod
+    def get_vulnerability_snyk_new():
+        return VULNERABILITY_SNYK.objects.filter(modification=MODIFICATION_NEW)
+
+    @staticmethod
+    def get_vulnerability_snyk_modified():
+        return VULNERABILITY_SNYK.objects.filter(modification=MODIFICATION_MODIFIED)
 
     @staticmethod
     def append_snyk_in_vulnerability_snyk_table(snyk):
-        return VULNERABILITY_SNYK.objects.create(
-            snyk_id=snyk["snyk_id"],
-            cve_id=snyk["cve_id"],
-            cve_url=snyk["cve_url"],
-            cwe_id=snyk["cwe_id"],
-            cwe_url=snyk["cwe_url"],
-            header_title=snyk["header_title"],
-            affecting_github=snyk["affecting_github"],
-            versions=snyk["versions"],
-            overview=snyk["overview"],
-            details=snyk["details"],
-            references=snyk["references"],
-            credit=snyk["credit"],
-            source_url=snyk["source_url"],
-            source=snyk["source"],
-            disclosed=snyk["disclosed"],
-            published=snyk["published"]
-        )
-
-    @staticmethod
-    def append_snyk_in_vulnerability_snyk_new_table(snyk):
-        objects = VULNERABILITY_SNYK_NEW.objects.filter(snyk_id=snyk["snyk_id"])
-        if len(objects) == 0:
-            return VULNERABILITY_SNYK_NEW.objects.create(
+        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).first()
+        if vulner is None:
+            return VULNERABILITY_SNYK.objects.create(
                 snyk_id=snyk["snyk_id"],
                 cve_id=snyk["cve_id"],
                 cve_url=snyk["cve_url"],
@@ -138,31 +136,23 @@ class SNYKController(object):
                 source_url=snyk["source_url"],
                 source=snyk["source"],
                 disclosed=snyk["disclosed"],
-                published=snyk["published"]
+                published=snyk["published"],
+                modification=MODIFICATION_NEW
             )
 
     @staticmethod
-    def append_snyk_in_vulnerability_snyk_modified_table(snyk):
-        objects = VULNERABILITY_SNYK_MODIFIED.objects.filter(snyk_id=snyk["snyk_id"])
-        if len(objects) == 0:
-            return VULNERABILITY_SNYK_MODIFIED.objects.create(
-                snyk_id=snyk["snyk_id"],
-                cve_id=snyk["cve_id"],
-                cve_url=snyk["cve_url"],
-                cwe_id=snyk["cwe_id"],
-                cwe_url=snyk["cwe_url"],
-                header_title=snyk["header_title"],
-                affecting_github=snyk["affecting_github"],
-                versions=snyk["versions"],
-                overview=snyk["overview"],
-                details=snyk["details"],
-                references=snyk["references"],
-                credit=snyk["credit"],
-                source_url=snyk["source_url"],
-                source=snyk["source"],
-                disclosed=snyk["disclosed"],
-                published=snyk["published"]
-            )
+    def mark_snyk_in_vulnerability_snyk_table_as_new(snyk):
+        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_NEW
+            vulner.save()
+
+    @staticmethod
+    def mark_snyk_in_vulnerability_snyk_table_as_modified(snyk):
+        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_MODIFIED
+            vulner.save()
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
@@ -226,35 +216,33 @@ class SNYKController(object):
 
     @staticmethod
     def update_snyk_in_snyk_table(snyk: dict):
-        return VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).update(
-            cve_id=snyk["cve_id"],
-            cve_url=snyk["cve_url"],
-            cwe_id=snyk["cwe_id"],
-            cwe_url=snyk["cwe_url"],
-            header_title=snyk["header_title"],
-            affecting_github=snyk["affecting_github"],
-            versions=snyk["versions"],
-            overview=snyk["overview"],
-            details=snyk["details"],
-            references=snyk["references"],
-            credit=snyk["credit"],
-            source_url=snyk["source_url"],
-            source=snyk["source"],
-            disclosed=snyk["disclosed"],
-            published=snyk["published"]
-        )
+        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).first()
+        if vulner is not None:
+            vulner.cve_id=snyk["cve_id"]
+            vulner.cve_url=snyk["cve_url"]
+            vulner.cwe_id=snyk["cwe_id"]
+            vulner.cwe_url=snyk["cwe_url"]
+            vulner.header_title=snyk["header_title"]
+            vulner.affecting_github=snyk["affecting_github"]
+            vulner.versions=snyk["versions"]
+            vulner.overview=snyk["overview"]
+            vulner.details=snyk["details"]
+            vulner.references=snyk["references"]
+            vulner.credit=snyk["credit"]
+            vulner.source_url=snyk["source_url"]
+            vulner.source=snyk["source"]
+            vulner.disclosed=snyk["disclosed"]
+            vulner.published=snyk["published"]
+            vulner.save()
 
     def create_or_update_snyk_vulnertability(self, snyk: dict):
-        objects = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"])
-        if len(objects) == 0:
+        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk['snyk_id']).first()
+        if vulner is None:
             self.append_snyk_in_vulnerability_snyk_table(snyk)
-            self.append_snyk_in_vulnerability_snyk_new_table(snyk)
             return 'created'
         else:
-            o = objects[0].data
-            if self.check_if_snyk_item_changed(o, snyk):
+            if self.check_if_snyk_item_changed(vulner.data, snyk):
                 self.update_snyk_in_snyk_table(snyk)
-                self.append_snyk_in_vulnerability_snyk_modified_table(snyk)
                 return 'updated'
             return 'skipped'
 
@@ -666,16 +654,18 @@ class SNYKController(object):
             message=TextMessages.ok.value,
             snyk_cnt_before=self.count_vulnerability_snyk_table(),
             snyk_cnt_after=self.count_vulnerability_snyk_table(),
-            new_cnt=self.count_vulnerability_snyk_new_tabele(),
-            modified_cnt=self.count_vulnerability_snyk_modified_table()
+            new_cnt=self.count_vulnerability_snyk_new_marked(),
+            modified_cnt=self.count_vulnerability_snyk_modified_marked()
         )
 
     def populate(self):
+        if SNYKConfig.drop_core_table:
+            self.clear_vulneranility_snyk_table()
         count = self.count_vulnerability_snyk_table()
         if count == 0:
             filtered_links = []
-            self.clear_vulnerability_snyk_new_table()
-            self.clear_vulnerability_snyk_modified_table()
+            self.clear_vulnerability_snyk_new_marks()
+            self.clear_vulnerability_snyk_modified_marks()
             snyk_count = 0
             for source in SNYKConfig.sources:
                 continue_work = True
@@ -691,8 +681,8 @@ class SNYKController(object):
                             message="{}".format(message),
                             snyk_cnt_before=self.count_vulnerability_snyk_table(),
                             snyk_cnt_after=self.count_vulnerability_snyk_table(),
-                            new_cnt=self.count_vulnerability_snyk_new_tabele(),
-                            modified_cnt=self.count_vulnerability_snyk_modified_table()
+                            new_cnt=self.count_vulnerability_snyk_new_marked(),
+                            modified_cnt=self.count_vulnerability_snyk_modified_marked()
                         )
                     if tree is not None:
                         try:
@@ -705,8 +695,8 @@ class SNYKController(object):
                                 message="{}".format(ex),
                                 snyk_cnt_before=self.count_vulnerability_snyk_table(),
                                 snyk_cnt_after=self.count_vulnerability_snyk_table(),
-                                new_cnt=self.count_vulnerability_snyk_new_tabele(),
-                                modified_cnt=self.count_vulnerability_snyk_modified_table()
+                                new_cnt=self.count_vulnerability_snyk_new_marked(),
+                                modified_cnt=self.count_vulnerability_snyk_modified_marked()
                             )
                     if len(filtered_links) == 0:
                         print_debug("Complete parsing source `{0}`".format(source))
@@ -725,23 +715,24 @@ class SNYKController(object):
                                     snyk_vulner["type"] = source
                                     if "disclosed" in snyk_vulner:
                                         if snyk_vulner["disclosed"] == SNYKConfig.undefined:
-                                            snyk_vulner["disclosed"] = timezone.now()
+                                            snyk_vulner["disclosed"] = make_aware(timezone.now())
                                         else:
-                                            snyk_vulner["disclosed"] = dateparser.parse(snyk_vulner["disclosed"])
+                                            snyk_vulner["disclosed"] = make_aware(dateparser.parse(snyk_vulner["disclosed"]))
                                     else:
-                                        snyk_vulner["disclosed"] = timezone.now()
+                                        snyk_vulner["disclosed"] = make_aware(timezone.now())
                                     if "published" in snyk_vulner:
                                         if snyk_vulner["published"] == SNYKConfig.undefined:
-                                            snyk_vulner["published"] = timezone.now()
+                                            snyk_vulner["published"] = make_aware(timezone.now())
                                         else:
-                                            snyk_vulner["published"] = dateparser.parse(snyk_vulner["published"])
+                                            snyk_vulner["published"] = make_aware(dateparser.parse(snyk_vulner["published"]))
                                     else:
-                                        snyk_vulner["published"] = unify_time(timezone.now())
+                                        snyk_vulner["published"] = make_aware(unify_time(timezone.now()))
 
+                                    print_debug("processing SNYK # {} with ID: {}".format(snyk_count, snyk_vulner["snyk_id"]))
+                                    snyk_count += 1
 
                                     self.create_or_update_snyk_vulnertability(snyk_vulner)
 
-                                    snyk_count += 1
                     page_number += 1
             print_debug("Complete populating {} Snyk vulnerabilities".format(snyk_count))
             return pack_answer(
@@ -749,8 +740,8 @@ class SNYKController(object):
                 message=TextMessages.ok.value,
                 snyk_cnt_before=self.count_vulnerability_snyk_table(),
                 snyk_cnt_after=self.count_vulnerability_snyk_table(),
-                new_cnt=self.count_vulnerability_snyk_new_tabele(),
-                modified_cnt=self.count_vulnerability_snyk_modified_table()
+                new_cnt=self.count_vulnerability_snyk_new_marked(),
+                modified_cnt=self.count_vulnerability_snyk_modified_marked()
             )
         else:
             print_debug("You want populate Snyk vulnerabilities, but Snyk table is not empty.")
@@ -759,21 +750,21 @@ class SNYKController(object):
                 message="You want populate Snyk vulnerabilities, but Snyk table is not empty.",
                 snyk_cnt_before=self.count_vulnerability_snyk_table(),
                 snyk_cnt_after=self.count_vulnerability_snyk_table(),
-                new_cnt=self.count_vulnerability_snyk_new_tabele(),
-                modified_cnt=self.count_vulnerability_snyk_modified_table()
+                new_cnt=self.count_vulnerability_snyk_new_marked(),
+                modified_cnt=self.count_vulnerability_snyk_modified_marked()
             )
 
     def update(self):
         if SNYKConfig.drop_core_table:
-            self.__clear_vulneranility_snyk_table()
-        self.clear_vulnerability_snyk_new_table()
-        self.clear_vulnerability_snyk_modified_table()
+            self.clear_vulneranility_snyk_table()
+        self.clear_vulnerability_snyk_all_marks()
         count_before = count_after = self.count_vulnerability_snyk_table()
 
         if count_before == 0:
             print_debug("You want populate Snyk vulnerabilities, but Snyk table is empty. Needs to populate it.")
             self.populate()
         else:
+            count = 0
             created_snyk_vulners = []
             filtered_links = []
             for source in SNYKConfig.sources:
@@ -797,8 +788,8 @@ class SNYKController(object):
                                 message="{}".format(ex),
                                 snyk_cnt_before=self.count_vulnerability_snyk_table(),
                                 snyk_cnt_after=self.count_vulnerability_snyk_table(),
-                                new_cnt=self.count_vulnerability_snyk_new_tabele(),
-                                modified_cnt=self.count_vulnerability_snyk_modified_table()
+                                new_cnt=self.count_vulnerability_snyk_new_marked(),
+                                modified_cnt=self.count_vulnerability_snyk_modified_marked()
                             )
 
                     if len(filtered_links) == 0:
@@ -817,20 +808,23 @@ class SNYKController(object):
                                     snyk_vulner["type"] = source
                                     if "disclosed" in snyk_vulner:
                                         if snyk_vulner["disclosed"] == SNYKConfig.undefined:
-                                            snyk_vulner["disclosed"] = timezone.now()
+                                            snyk_vulner["disclosed"] = make_aware(timezone.now())
                                         else:
                                             snyk_vulner["disclosed"] = dateparser.parse(snyk_vulner["disclosed"])
                                     else:
-                                        snyk_vulner["disclosed"] = timezone.now()
+                                        snyk_vulner["disclosed"] = make_aware(timezone.now())
                                     if "published" in snyk_vulner:
                                         if snyk_vulner["published"] == SNYKConfig.undefined:
-                                            snyk_vulner["published"] = timezone.now()
+                                            snyk_vulner["published"] = make_aware(timezone.now())
                                         else:
                                             snyk_vulner["published"] = dateparser.parse(snyk_vulner["published"])
                                     else:
-                                        snyk_vulner["published"] = unify_time(timezone.now())
+                                        snyk_vulner["published"] = make_aware(unify_time(timezone.now()))
 
+                                    print_debug("processing SNYK # {} with ID: {}".format(count, snyk_vulner["snyk_id"]))
+                                    count += 1
                                     result = self.create_or_update_snyk_vulnertability(snyk_vulner)
+
                                     if result == "updated":
                                         print_debug("Riched end of update")
                                         continue_work = False
@@ -853,6 +847,6 @@ class SNYKController(object):
                 message=TextMessages.ok.value,
                 snyk_cnt_before=self.count_vulnerability_snyk_table(),
                 snyk_cnt_after=self.count_vulnerability_snyk_table(),
-                new_cnt=self.count_vulnerability_snyk_new_tabele(),
-                modified_cnt=self.count_vulnerability_snyk_modified_table()
+                new_cnt=self.count_vulnerability_snyk_new_marked(),
+                modified_cnt=self.count_vulnerability_snyk_modified_marked()
             )

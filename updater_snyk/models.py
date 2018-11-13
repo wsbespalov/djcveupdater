@@ -67,6 +67,8 @@ class VULNERABILITY_SNYK(models.Model):
     disclosed = models.DateTimeField(default=timezone.now)
     published = models.DateTimeField(default=timezone.now)
 
+    modification = models.IntegerField(default=0)
+
     objects = models.Manager()
 
     class Meta:
@@ -100,114 +102,5 @@ class VULNERABILITY_SNYK(models.Model):
         data["source"] = self.source
         data["disclosed"] = self.disclosed
         data["published"] = self.published
-        return data
-
-
-class VULNERABILITY_SNYK_NEW(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    snyk_id = models.TextField(default="")
-    cve_id = models.TextField(default="")
-    cve_url = models.TextField(default="")
-    cwe_id = models.TextField(default="")
-    cwe_url = models.TextField(default="")
-    header_title = models.TextField(default="")
-    affecting_github = models.TextField(default="")
-    versions = models.TextField(default="")
-    overview = models.TextField(default="")
-    details = models.TextField(default="")
-    references = ArrayField(models.TextField(blank=True), default=list)
-    credit = models.TextField(default="")
-    source_url = models.TextField(default="")
-    source = models.TextField(default="")
-    disclosed = models.DateTimeField(default=timezone.now)
-    published = models.DateTimeField(default=timezone.now)
-
-    objects = models.Manager()
-
-    class Meta:
-        ordering = ['snyk_id']
-        verbose_name = 'VULNERABILITY_SNYK_NEW'
-        verbose_name_plural = 'VULNERABILITY_SNYKS_NEW'
-
-    def __str__(self):
-        return "{}".format(self.snyk_id)
-
-    def __unicode__(self):
-        return "SNYK: {}".format(self.snyk_id)
-
-    @property
-    def data(self):
-        data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
-        data["id"] = self.id
-        data["snyk_id"] = self.snyk_id
-        data["cve_id"] = self.cve_id
-        data["cve_url"] = self.cve_url
-        data["cwe_id"] = self.cwe_id
-        data["cwe_url"] = self.cwe_url
-        data["header_title"] = self.header_title
-        data["affecting_github"] = self.affecting_github
-        data["versions"] = self.versions
-        data["overview"] = self.overview
-        data["details"] = self.details
-        data["references"] = self.references
-        data["credit"] = self.credit
-        data["source_url"] = self.source_url
-        data["source"] = self.source
-        data["disclosed"] = self.disclosed
-        data["published"] = self.published
-        return data
-
-
-class VULNERABILITY_SNYK_MODIFIED(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    snyk_id = models.TextField(default="")
-    cve_id = models.TextField(default="")
-    cve_url = models.TextField(default="")
-    cwe_id = models.TextField(default="")
-    cwe_url = models.TextField(default="")
-    header_title = models.TextField(default="")
-    affecting_github = models.TextField(default="")
-    versions = models.TextField(default="")
-    overview = models.TextField(default="")
-    details = models.TextField(default="")
-    references = ArrayField(models.TextField(blank=True), default=list)
-    credit = models.TextField(default="")
-    source_url = models.TextField(default="")
-    source = models.TextField(default="")
-    disclosed = models.DateTimeField(default=timezone.now)
-    published = models.DateTimeField(default=timezone.now)
-
-    objects = models.Manager()
-
-    class Meta:
-        ordering = ['snyk_id']
-        verbose_name = 'VULNERABILITY_SNYK'
-        verbose_name_plural = 'VULNERABILITY_SNYKS_MODIFIED'
-
-    def __str__(self):
-        return "{}".format(self.snyk_id)
-
-    def __unicode__(self):
-        return "SNYK: {}".format(self.snyk_id)
-
-    @property
-    def data(self):
-        data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
-        data["id"] = self.id
-        data["snyk_id"] = self.snyk_id
-        data["cve_id"] = self.cve_id
-        data["cve_url"] = self.cve_url
-        data["cwe_id"] = self.cwe_id
-        data["cwe_url"] = self.cwe_url
-        data["header_title"] = self.header_title
-        data["affecting_github"] = self.affecting_github
-        data["versions"] = self.versions
-        data["overview"] = self.overview
-        data["details"] = self.details
-        data["references"] = self.references
-        data["credit"] = self.credit
-        data["source_url"] = self.source_url
-        data["source"] = self.source
-        data["disclosed"] = self.disclosed
-        data["published"] = self.published
+        data["modification"] = self.modification
         return data

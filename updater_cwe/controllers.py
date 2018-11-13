@@ -192,9 +192,12 @@ class CWEController(object):
         vulner = VULNERABILITY_CWE.objects.filter(cwe_id=cwe['cwe_id']).first()
         if vulner is None:
             self.append_cwe_in_vulnerability_cwe_table(cwe)
+            return "created"
         else:
             if self.check_if_cwe_item_changed(vulner.data, cwe):
                 self.update_cwe_in_cwe_table(cwe)
+                return "updated"
+            return "skipped"
 
     def stats(self):
         return pack_answer(

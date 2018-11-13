@@ -197,9 +197,12 @@ class CPEController(object):
         vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).first()
         if vulner is None:
             self.append_cpe_in_vulnerability_cpe_table(cpe=cpe)
+            return "created"
         else:
             if self.check_if_capec_item_changed(vulner.data, cpe):
                 self.update_cpe_in_cpe_table(cpe)
+                return "updated"
+            return "skipped"
 
     @staticmethod
     def cpe_parser(cpe_string):

@@ -235,9 +235,12 @@ class CVEController():
         vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).first()
         if vulner is None:
             self.append_cve_in_vulnerability_cve_table(cve)
+            return "created"
         else:
             if self.check_if_cve_item_changed(vulner.data, cve):
                 self.update_cve_in_cve_table(cve)
+                return "updated"
+            return "skipped"
 
     def stats(self):
         return pack_answer(

@@ -192,9 +192,12 @@ class CAPECController(object):
         vulner = VULNERABILITY_CAPEC.objects.filter(capec_id=capec['capec_id']).first()
         if vulner is None:
             self.append_capec_in_vulnerability_capec_table(capec)
+            return 'created'
         else:
             if self.check_if_capec_item_changed(vulner.data, capec):
                 self.update_capec_in_capec_table(capec)
+                return 'updated'
+            return 'skipped'
 
     def stats(self):
         return pack_answer(
