@@ -111,26 +111,28 @@ class NPMController(object):
     def append_npm_in_vulnerability_npm_table(npm):
         vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).first()
         if vulner is None:
-            npm_id=npm["npm_id"],
-            created=npm["created"],
-            updated=npm["updated"],
-            title=npm["title"],
-            author=npm["author"],
-            module_name=npm["module_name"],
-            published_date=npm["published_date"],
-            cves=npm["cves"],
-            vulnerable_versions=npm["vulnerable_versions"],
-            slug=npm["slug"],
-            overview=npm["overview"],
-            recommendation=npm["recommendation"],
-            references=npm["references"],
-            legacy_slug=npm["legacy_slug"],
-            allowed_scopes=npm["allowed_scopes"],
-            cvss_vector=npm["cvss_vector"],
-            cvss_score=npm["cvss_score"],
-            cwe=npm["cwe"],
-            source=npm["source"],
-            modification=MODIFICATION_NEW
+            return VULNERABILITY_NPM.objects.create(
+                npm_id=npm["npm_id"],
+                created=npm["created"],
+                updated=npm["updated"],
+                title=npm["title"],
+                author=npm["author"],
+                module_name=npm["module_name"],
+                published_date=npm["published_date"],
+                cves=npm["cves"],
+                vulnerable_versions=npm["vulnerable_versions"],
+                slug=npm["slug"],
+                overview=npm["overview"],
+                recommendation=npm["recommendation"],
+                references=npm["references"],
+                legacy_slug=npm["legacy_slug"],
+                allowed_scopes=npm["allowed_scopes"],
+                cvss_vector=npm["cvss_vector"],
+                cvss_score=npm["cvss_score"],
+                cwe=npm["cwe"],
+                source=npm["source"],
+                modification=MODIFICATION_NEW,
+            )
 
     @staticmethod
     def mark_npm_in_vulnerability_npm_table_as_new(npm):
@@ -542,12 +544,12 @@ class NPMController(object):
                             npm_item['patched_versions']
                         )
                     npm["npm_id"] = 'NPM-' + str(npm_item['id']) if npm_item['id'] != UNDEFINED else UNDEFINED
-                    npm["created"] = time_string_to_datetime(unify_time(npm_item['created_at']))
-                    npm["updated"] = time_string_to_datetime(unify_time(npm_item['updated_at']))
+                    npm["created"] = make_aware(time_string_to_datetime(unify_time(npm_item['created_at'])))
+                    npm["updated"] = make_aware(time_string_to_datetime(unify_time(npm_item['updated_at'])))
                     npm["title"] = npm_item['title']
                     npm["author"] = npm_item['author']
                     npm["module_name"] = npm_item['module_name']
-                    npm["published_date"] = time_string_to_datetime(unify_time(npm_item['publish_date']))
+                    npm["published_date"] = make_aware(time_string_to_datetime(unify_time(npm_item['publish_date'])))
                     npm["cves"] = npm_item['cves']
                     npm["vulnerable_versions"] = vulnerable_versions_
                     npm["patched_versions"] = patched_versions_
@@ -571,7 +573,7 @@ class NPMController(object):
             self.save_status_in_local_status_table(dict(
                 name="npm",
                 count=count_after,
-                updated=last_modified,
+                updated=make_aware(last_modified),
                 status="updated"
             ))
             return pack_answer(
