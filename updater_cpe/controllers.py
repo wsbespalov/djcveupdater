@@ -1,7 +1,7 @@
 from xml.sax import make_parser
 
 from django.utils import timezone
-from django.utils.timezone import make_aware
+from django.db import transaction
 
 from .utils import to_string_formatted_cpe
 from .utils import time_string_to_datetime
@@ -14,13 +14,12 @@ from .handlers import CPEHandler
 
 from .models import STATUS_CPE
 from .models import VULNERABILITY_CPE
-from .models import VULNERABILITY_CPE_NEW
-from .models import VULNERABILITY_CPE_MODIFIED
 
 from .configurations import CPEConfig
 
-import logging
-logger = logging.getLogger(__name__)
+MODIFICATION_CLEAR = 0
+MODIFICATION_NEW = 1
+MODIFICATION_MODIFIED = 2
 
 
 def print_debug(message):
@@ -57,68 +56,77 @@ class CPEController(object):
             x.delete()
 
     @staticmethod
-    def clear_vulnerability_cpe_new_table():
-        for x in VULNERABILITY_CPE_NEW.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_cpe_all_marks():
+        entries = VULNERABILITY_CPE.objects.select_for_update().all().defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
-    def clear_vulnerability_cpe_modified_table():
-        for x in VULNERABILITY_CPE_MODIFIED.objects.all().iterator():
-            x.delete()
+    def clear_vulnerability_capec_new_marks():
+        entries = VULNERABILITY_CPE.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
+
+    @staticmethod
+    def clear_vulnerability_capec_modified_marks():
+        entries = VULNERABILITY_CPE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        with transaction.atomic():
+            for entry in entries:
+                entry.modification = MODIFICATION_CLEAR
+                entry.save()
 
     @staticmethod
     def count_vulnerability_cpe_table():
         return VULNERABILITY_CPE.objects.count()
 
     @staticmethod
-    def count_vulnerability_cpe_new_table():
-        return VULNERABILITY_CPE_NEW.objects.count()
+    def count_vulnerability_cpe_new_marked():
+        return VULNERABILITY_CPE.objects.filter(modification=MODIFICATION_NEW).count()
 
     @staticmethod
-    def count_vulnerability_cpe_modified_table():
-        return VULNERABILITY_CPE_MODIFIED.objects.count()
+    def count_vulnerability_cpe_modified_marked():
+        return VULNERABILITY_CPE.objects.filter(modification=MODIFICATION_MODIFIED).count()
+
+    @staticmethod
+    def get_vulnerability_cpe_new():
+        return VULNERABILITY_CPE.objects.filter(modification=MODIFICATION_NEW)
+
+    @staticmethod
+    def get_vulnerability_cpe_modified():
+        return VULNERABILITY_CPE.objects.filter(modification=MODIFICATION_MODIFIED)
 
     @staticmethod
     def append_cpe_in_vulnerability_cpe_table(cpe):
-        return VULNERABILITY_CPE.objects.create(
-            cpe_id=cpe['cpe_id'],
-            title=cpe['title'],
-            cpe_2_2=cpe['cpe_2_2'],
-            references=cpe['references'],
-            component=cpe['component'],
-            version=cpe['version'],
-            vendor=cpe['vendor']
-        )
-
-    @staticmethod
-    def append_cpe_in_vulnerability_cpe_new_table(cpe):
-        objects = list(VULNERABILITY_CPE_NEW.objects.filter(cpe_id=cpe['cpe_id']))
-        if len(objects) == 0:
-            return VULNERABILITY_CPE_NEW.objects.create(
+        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).first()
+        if vulner is None:
+            return VULNERABILITY_CPE.objects.create(
                 cpe_id=cpe['cpe_id'],
                 title=cpe['title'],
                 cpe_2_2=cpe['cpe_2_2'],
                 references=cpe['references'],
                 component=cpe['component'],
                 version=cpe['version'],
-                vendor=cpe['vendor']
+                vendor=cpe['vendor'],
+                modification=MODIFICATION_NEW
             )
-        return None
 
     @staticmethod
-    def append_cpe_in_vulnerability_cpe_modified_table(cpe):
-        objects = list(VULNERABILITY_CPE_MODIFIED.objects.filter(cpe_id=cpe['cpe_id']))
-        if len(objects) == 0:
-            return VULNERABILITY_CPE_MODIFIED.objects.create(
-                cpe_id=cpe['cpe_id'],
-                title=cpe['title'],
-                cpe_2_2=cpe['cpe_2_2'],
-                references=cpe['references'],
-                component=cpe['component'],
-                version=cpe['version'],
-                vendor=cpe['vendor']
-            )
-        return None
+    def mark_cpe_in_vulnerability_cpe_table_as_new(cpe):
+        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_NEW
+            vulner.save()
+
+    @staticmethod
+    def mark_cpe_in_vulnerability_cpe_table_as_modified(cpe):
+        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).defer("modification").first()
+        if vulner is not None:
+            vulner.modification = MODIFICATION_MODIFIED
+            vulner.save()
 
     @staticmethod
     def save_status_in_local_status_table(status: dict):
@@ -174,25 +182,24 @@ class CPEController(object):
 
     @staticmethod
     def update_cpe_in_cpe_table(cpe):
-        return VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).update(
-            title=cpe['title'],
-            cpe_2_2=cpe['cpe_2_2'],
-            references=cpe['references'],
-            component=cpe['component'],
-            version=cpe['version'],
-            vendor=cpe['vendor']
-        )
+        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).first()
+        if vulner is not None:
+            vulner.title=cpe['title']
+            vulner.cpe_2_2=cpe['cpe_2_2']
+            vulner.references=cpe['references']
+            vulner.component=cpe['component']
+            vulner.version=cpe['version']
+            vulner.vendor=cpe['vendor']
+            vulner.modification=MODIFICATION_MODIFIED
+            vulner.save()
 
     def create_or_update_cpe_vulnerability(self, cpe):
-        objects = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"])
-        if len(objects) == 0:
+        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).first()
+        if vulner is None:
             self.append_cpe_in_vulnerability_cpe_table(cpe=cpe)
-            self.append_cpe_in_vulnerability_cpe_new_table(cpe=cpe)
         else:
-            o = objects[0].data
-            if self.check_if_capec_item_changed(o, cpe):
+            if self.check_if_capec_item_changed(vulner.data, cpe):
                 self.update_cpe_in_cpe_table(cpe)
-                self.append_cpe_in_vulnerability_cpe_modified_table(cpe=cpe)
 
     @staticmethod
     def cpe_parser(cpe_string):
@@ -329,8 +336,8 @@ class CPEController(object):
             message=TextMessages.ok.value,
             cpe_cnt_before=self.count_vulnerability_cpe_table(),
             cpe_cnt_after=self.count_vulnerability_cpe_table(),
-            new_cnt=self.count_vulnerability_cpe_new_table(),
-            modified_cnt=self.count_vulnerability_cpe_modified_table()
+            new_cnt=self.count_vulnerability_cpe_new_marked(),
+            modified_cnt=self.count_vulnerability_cpe_modified_marked()
         )
 
     @staticmethod
@@ -345,12 +352,13 @@ class CPEController(object):
     def update(self):
         if CPEConfig.drop_core_table:
             self.clear_vulnerability_cpe_table()
-        self.clear_vulnerability_cpe_new_table()
-        self.clear_vulnerability_cpe_modified_table()
+        self.clear_vulnerability_cpe_all_marks()
+        print_debug("create parsers")
         count_before = count_after = self.count_vulnerability_cpe_table()
         parser = make_parser()
         cpe_handler = CPEHandler()
         parser.setContentHandler(cpe_handler)
+        print_debug("download file")
         (file_path, success, last_modified, size, fmt) = upload_file()
         if success and file_path != '':
             # FIXME: Make last_modified comparison
@@ -364,8 +372,9 @@ class CPEController(object):
                     new_cnt=0,
                     modified_cnt=0
                 )
-            logger.info(TextMessages.parse_data.value)
+            print_debug("parse file")
             parser.parse(f)
+
             count = 0
             for cpe in cpe_handler.cpe:
                 print_debug('processing: {}'.format(count))
@@ -384,25 +393,29 @@ class CPEController(object):
                 x['version'] = version
                 x['vendor'] = vendor
                 self.create_or_update_cpe_vulnerability(x)
+            print_debug("complete parsing")
             count_after = self.count_vulnerability_cpe_table()
+            print_debug("save stats")
             self.save_status_in_local_status_table(dict(
                 name="cpe",
                 count=count_after,
-                updated=time_string_to_datetime(last_modified)
+                updated=last_modified,
+                status="updated"
             ))
+            print_debug("complete")
             return pack_answer(
                 status=TextMessages.ok.value,
                 message=TextMessages.cpe_updated.value,
                 cpe_cnt_before=count_before,
                 cpe_cnt_after=count_after,
-                new_cnt=self.count_vulnerability_cpe_new_table(),
-                modified_cnt=self.count_vulnerability_cpe_modified_table()
+                new_cnt=self.count_vulnerability_cpe_new_marked(),
+                modified_cnt=self.count_vulnerability_cpe_modified_marked()
             )
         return pack_answer(
             status=TextMessages.error.value,
             message=TextMessages.cant_download_file.value,
             cpe_cnt_before=count_before,
             cpe_cnt_after=count_after,
-            new_cnt=self.count_vulnerability_cpe_new_table(),
-            modified_cnt=self.count_vulnerability_cpe_modified_table()
+            new_cnt=self.count_vulnerability_cpe_new_marked(),
+            modified_cnt=self.count_vulnerability_cpe_modified_marked()
         )

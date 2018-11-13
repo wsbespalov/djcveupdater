@@ -1,1 +1,1 @@
-Terminate batch job (Y/N)? 
+git+https://github.com/SOFTWARE-CLINIC/featurebook.git
