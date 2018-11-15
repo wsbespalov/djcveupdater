@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'updater_capec',
     'updater_npm',
     'updater_snyk',
-    'updater_cve'
+    'updater_cve',
+    'updater_vulnerabilities'
 ]
 
 MIDDLEWARE = [

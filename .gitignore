@@ -5,6 +5,19 @@ __pycache__/
 
 venv
 venv/
+venv\
+
+versions.txt
+source.txt
+versions_s.txt
+advisories.json
+capec.xml
+cpe.xml
+cpe.zip
+nvdcve*.zip
+
+.vscode/
+.vscode\
 
 .idea
 .idea/
