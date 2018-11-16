@@ -62,7 +62,7 @@ class CVEController():
 
     @staticmethod
     def clear_vulnerability_cve_all_marks():
-        entries = VULNERABILITY_CVE.objects.select_for_update().all().defer("modification")
+        entries = VULNERABILITY_CVE.objects.select_for_update().all().only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -70,7 +70,7 @@ class CVEController():
 
     @staticmethod
     def clear_vulnerability_cve_new_marks():
-        entries = VULNERABILITY_CVE.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        entries = VULNERABILITY_CVE.objects.select_for_update().filter(modification=MODIFICATION_NEW).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -78,7 +78,7 @@ class CVEController():
 
     @staticmethod
     def clear_vulnerability_cve_modified_marks():
-        entries = VULNERABILITY_CVE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        entries = VULNERABILITY_CVE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -101,8 +101,16 @@ class CVEController():
         return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_NEW)
 
     @staticmethod
+    def get_vulnerability_cve_new_ids():
+        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_NEW).only("cve_id")
+
+    @staticmethod
     def get_vulnerability_cve_modified():
         return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_MODIFIED)
+
+    @staticmethod
+    def get_vulnerability_cve_modified_ids():
+        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_MODIFIED).only("cve_id")
 
     @staticmethod
     def append_cve_in_vulnerability_cve_table(cve):
@@ -129,14 +137,14 @@ class CVEController():
 
     @staticmethod
     def mark_cve_in_vulnerability_cve_table_as_new(cve):
-        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).defer("modification").first()
+        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_NEW
             vulner.save()
 
     @staticmethod
     def mark_cve_in_vulnerability_cve_table_as_modified(cve):
-        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).defer("modification").first()
+        vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_MODIFIED
             vulner.save()
@@ -213,7 +221,6 @@ class CVEController():
     def update_cve_in_cve_table(cve):
         vulner = VULNERABILITY_CVE.objects.filter(cve_id=cve["cve_id"]).first()
         if vulner is not None:
-            vulner.cve_id=cve["cve_id"],
             vulner.cwe=cve["cwe"],
             vulner.references=cve["references"],
             vulner.vulnerable_configuration=cve["vulnerable_configuration"],

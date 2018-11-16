@@ -102,7 +102,7 @@ class VULNERABILITIES(models.Model):
     vulnerabe_versions = ArrayField(models.TextField(blank=True), default=list)
     patched_versions = ArrayField(models.TextField(blank=True), default=list)
     access = JSONField(default=default_access)
-    impacat = JSONField(default=default_impact)
+    impact = JSONField(default=default_impact)
     references = ArrayField(models.TextField(blank=True), default=list)
     component_versions = ArrayField(models.TextField(blank=True), default=list)
     component_versions_string = ArrayField(models.TextField(blank=True), default=list)
@@ -155,7 +155,7 @@ class VULNERABILITIES(models.Model):
         data["vulnerable_versions"] = self.vulnerabe_versions
         data["patched_versions"] = self.patched_versions
         data["access"] = self.access
-        data["impact"] = self.impacat
+        data["impact"] = self.impact
         data["references"] = self.references
         data["component_versions"] = self.component_versions
         data["component_versions_string"] = self.component_versions_string
