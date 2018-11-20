@@ -51,7 +51,7 @@ class CVEItem(object):
             value = dd.get("value", "")
             self.description = self.description + value
 
-        # GET cpe -> JSON with list -> {"data": cpe22}
+        # GET cpe -> JSON with list
         cpe22 = []
         conf = data.get("configurations", {})
         nodes = conf.get("nodes", [])
@@ -69,7 +69,29 @@ class CVEItem(object):
                 else:
                     cpe22.append(c22)
 
-        self.vulnerable_configuration = cpe22
+        cpe23 = []
+        conf = data.get("configurations", {})
+        nodes = conf.get("nodes", [])
+        for n in nodes:
+            cpe = n.get("cpe_match", [])
+            for c in cpe:
+                c23 = c.get("cpe23Uri", None)
+                vulnerable = c.get("vulnerable", False)
+                if vulnerable:
+                    if c23 is not None:
+                        versionEndIncluding = c.get("versionEndIncluding", None)
+                        if versionEndIncluding is not None:
+                            c23_new = c23 + ":" + str(versionEndIncluding)
+                            cpe23.append(c23_new)
+                            c23_new2 = c23 + ":?"
+                            cpe23.append(c23_new2)
+                        else:
+                            cpe23.append(c23)    
+        
+        cpe_merged = []
+        cpe_merged = list(set(cpe22 + cpe23))
+
+        self.vulnerable_configuration = cpe_merged
 
         self.published = data.get("publishedDate", datetime.utcnow())
         self.modified = data.get("lastModifiedDate", datetime.utcnow())

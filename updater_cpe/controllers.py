@@ -27,6 +27,11 @@ def print_debug(message):
         print(message)
 
 
+def ask_user():
+    if CPEConfig.enable_input:
+        var = input("Press key...")
+
+
 def pack_answer(
         status=TextMessages.error.value,
         message=TextMessages.error.value,
@@ -57,7 +62,7 @@ class CPEController(object):
 
     @staticmethod
     def clear_vulnerability_cpe_all_marks():
-        entries = VULNERABILITY_CPE.objects.select_for_update().all().defer("modification")
+        entries = VULNERABILITY_CPE.objects.select_for_update().all().only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -65,7 +70,7 @@ class CPEController(object):
 
     @staticmethod
     def clear_vulnerability_capec_new_marks():
-        entries = VULNERABILITY_CPE.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        entries = VULNERABILITY_CPE.objects.select_for_update().filter(modification=MODIFICATION_NEW).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -73,7 +78,7 @@ class CPEController(object):
 
     @staticmethod
     def clear_vulnerability_capec_modified_marks():
-        entries = VULNERABILITY_CPE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        entries = VULNERABILITY_CPE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -116,14 +121,14 @@ class CPEController(object):
 
     @staticmethod
     def mark_cpe_in_vulnerability_cpe_table_as_new(cpe):
-        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).defer("modification").first()
+        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_NEW
             vulner.save()
 
     @staticmethod
     def mark_cpe_in_vulnerability_cpe_table_as_modified(cpe):
-        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).defer("modification").first()
+        vulner = VULNERABILITY_CPE.objects.filter(cpe_id=cpe["cpe_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_MODIFIED
             vulner.save()

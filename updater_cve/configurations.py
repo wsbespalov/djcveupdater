@@ -2,6 +2,7 @@
 
 class CVEConfig(object):
     drop_core_table = True
+    enable_input = False
     debug = True
     http_ignore_certs = False
     proxy = ""

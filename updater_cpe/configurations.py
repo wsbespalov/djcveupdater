@@ -2,6 +2,7 @@
 
 class CPEConfig(object):
     drop_core_table = True
+    enable_input = True
     debug = True
     http_ignore_certs = False
     proxy = ""

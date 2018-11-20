@@ -57,7 +57,7 @@ class CWEController(object):
 
     @staticmethod
     def clear_vulnerability_capec_all_marks():
-        entries = VULNERABILITY_CWE.objects.select_for_update().all().defer("modification")
+        entries = VULNERABILITY_CWE.objects.select_for_update().all().only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -65,7 +65,7 @@ class CWEController(object):
 
     @staticmethod
     def clear_vulnerability_cwe_new_marks():
-        entries = VULNERABILITY_CWE.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        entries = VULNERABILITY_CWE.objects.select_for_update().filter(modification=MODIFICATION_NEW).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -73,7 +73,7 @@ class CWEController(object):
 
     @staticmethod
     def clear_vulnerability_cwe_modified_marks():
-        entries = VULNERABILITY_CWE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        entries = VULNERABILITY_CWE.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -114,14 +114,14 @@ class CWEController(object):
 
     @staticmethod
     def mark_cwe_in_vulnerability_cwe_table_as_new(cwe):
-        vulner = VULNERABILITY_CWE.objects.filter(cwe_id=cwe["cwe_id"]).defer("modification").first()
+        vulner = VULNERABILITY_CWE.objects.filter(cwe_id=cwe["cwe_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_NEW
             vulner.save()
 
     @staticmethod
     def mark_cwe_in_vulnerability_cwe_table_as_modified(cwe):
-        vulner = VULNERABILITY_CWE.objects.filter(cwe_id=cwe["cwe_id"]).defer("modification").first()
+        vulner = VULNERABILITY_CWE.objects.filter(cwe_id=cwe["cwe_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_MODIFIED
             vulner.save()

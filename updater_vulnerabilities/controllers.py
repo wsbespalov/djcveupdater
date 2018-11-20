@@ -15,6 +15,7 @@ from .text_messages import TextMessages
 
 from .configurations import VULNERABILITIESConfig
 
+from .spid import generate_id
 
 from updater_cve.controllers import CVEController
 
@@ -29,6 +30,11 @@ MODIFICATION_MODIFIED = 2
 def print_debug(message):
     if VULNERABILITIESConfig.debug:
         print(message)
+
+
+def ask_input(message="Press Enter..."):
+    if VULNERABILITIESConfig.enable_input:
+        input(message)
 
 
 def pack_answer(
@@ -54,14 +60,18 @@ def pack_answer(
 
 class VULNERABILITIESController():
 
+    def __init__(self, *args, **kwargs):
+        self.cve_controller = CVEController()
+        return super().__init__(*args, **kwargs)
+
     @staticmethod
-    def count_vulnerabilities_table():
+    def clear_vulnerabilities_table():
         for x in VULNERABILITIES.objects.all().iterator():
             x.delete()
 
     @staticmethod
     def clear_vulnerabilities_all_marks():
-        entries = VULNERABILITIES.objects.select_for_update().all().defer("modification")
+        entries = VULNERABILITIES.objects.select_for_update().all().only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -69,7 +79,7 @@ class VULNERABILITIESController():
 
     @staticmethod
     def clear_vulnerabilities_new_marks():
-        entries = VULNERABILITIES.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        entries = VULNERABILITIES.objects.select_for_update().filter(modification=MODIFICATION_NEW).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -77,7 +87,7 @@ class VULNERABILITIESController():
 
     @staticmethod
     def clear_vulnerabilities_modified_marks():
-        entries = VULNERABILITIES.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        entries = VULNERABILITIES.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -104,49 +114,15 @@ class VULNERABILITIESController():
         return VULNERABILITIES.objects.filter(modification=MODIFICATION_MODIFIED)
 
     @staticmethod
-    def append_vilnerability_in_vulnerabilities_table(vulnerability):
-        vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).first()
-        if vulner is None:
-            vulner = VULNERABILITIES(
-                vulnerability_id=vulnerability["vulnerability_id"],
-                component=vulnerability["component"],
-                published=vulnerability["published"],
-                modified=vulnerability["modified"],
-                cvss_time=vulnerability["cvss_time"],
-                cvss_score=vulnerability["cvss_score"],
-                cvss_rank=floor(vulnerability["cvss"]),
-                cvss_vector=vulnerability["cvss_vector"],
-                description=vulnerability["description"],
-                type=vulnerability["type"],
-                access=vulnerability["access"],
-                impact=vulnerability["impact"],
-                references=vulnerability["references"],
-                cpe_list=vulnerability["cpe_list"],
-                component_versions=vulnerability["component_versions"],
-                component_versions_string=vulnerability["component_versions_string"],
-                source=vulnerability["source"],
-                cve_list=vulnerability["cve_list"],
-                cwe_list=vulnerability["cwe_list"],
-                capec_list=vulnerability["capec_list"],
-                cwe_id_list=vulnerability["cwe_id_list"],
-                modification=MODIFICATION_NEW
-            )
-
-
-
-            vulner.save()
-
-
-    @staticmethod
-    def mark_vilnerability_in_vulnerabilities_table_as_new(vulnerability):
-        vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).defer("modification").first()
+    def mark_vulnerability_in_vulnerabilities_table_as_new(vulnerability):
+        vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_NEW
             vulner.save()
 
     @staticmethod
-    def mark_vilnerability_in_vulnerabilities_table_as_modified(vulnerability):
-        vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).defer("modification").first()
+    def mark_vulnerability_in_vulnerabilities_table_as_modified(vulnerability):
+        vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_MODIFIED
             vulner.save()
@@ -200,8 +176,18 @@ class VULNERABILITIESController():
     def get_status_from_global_status_table():
         pass
 
+    def stats(self):
+        return pack_answer(
+            status=TextMessages.ok.value,
+            message=TextMessages.ok.value,
+            vulner_cnt_before=self.count_vulnerabilities_table(),
+            vulner_cnt_after=self.count_vulnerabilities_table(),
+            new_cnt=self.count_vulnerabilities_new_marked(),
+            modified_cnt=self.count_vulnerabilities_modified_marked()
+        )
+
     @staticmethod
-    def check_if_vulnerability_item_changed(old, new):
+    def check_if_vulnerability_item_changed__compare_by_json_content(old, new):
         if old["component"] != new["component"] or \
             old["modified"] != new["modified"] or \
             old["last_seen"] != new["last_seen"] or \
@@ -216,7 +202,7 @@ class VULNERABILITIESController():
             old["author"] != new["author"] or \
             old["type"] != new["type"] or \
             old["source"] != new["source"] or \
-            old["vulnerabe_versions"] != new["vulnerabe_versions"] or \
+            old["vulnerable_versions"] != new["vulnerable_versions"] or \
             old["patched_versions"] != new["patched_versions"] or \
             old["access"] != new["access"] or \
             old["impact"] != new["references"] or \
@@ -225,60 +211,108 @@ class VULNERABILITIESController():
             return True
         return False
 
-    @staticmethod
-    def update_vulnerability_in_vulnerabilities_table(vulnerability):
+    def create_vulner_in_vulnerability_table__from_json(self, vulnerability):
+        vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).first()
+        if vulner is None:
+            vulner = VULNERABILITIES(
+                vulnerability_id=vulnerability["vulnerability_id"],
+                parent_id=vulnerability["parent_id"],
+                component=vulnerability["component"],
+                published=vulnerability["published"],
+                modified=vulnerability["modified"],
+                cvss_time=vulnerability["cvss_time"],
+                cvss_score=vulnerability["cvss_score"],
+                cvss_rank=floor(vulnerability["cvss"]),
+                cvss_vector=vulnerability["cvss_vector"],
+                description=vulnerability["description"],
+                type=vulnerability["type"],
+                access=vulnerability["access"],
+                impact=vulnerability["impact"],
+                references=vulnerability["references"],
+                cpe_list=vulnerability["cpe_list"],
+                component_versions=vulnerability["component_versions"],
+                component_versions_string=vulnerability["component_versions_string"],
+                source=vulnerability["source"],
+                cve_list=vulnerability["cve_list"],
+                cwe_list=vulnerability["cwe_list"],
+                capec_list=vulnerability["capec_list"],
+                cwe_id_list=vulnerability["cwe_id_list"],
+                modification=MODIFICATION_NEW
+            )
+            vulner.save()
+
+    def update_vulner_in_vulnerability_table__from_json(self, vulnerability):
         vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).first()
         if vulner is not None:
-                vulner.component=vulnerability["component"],
-                vulner.published=vulnerability["published"],
-                vulner.modified=vulnerability["modified"],
-                vulner.cvss_time=vulnerability["cvss_time"],
-                vulner.cvss_score=vulnerability["cvss_score"],
-                vulner.cvss_rank=floor(vulnerability["cvss"]),
-                vulner.cvss_vector=vulnerability["cvss_vector"],
-                vulner.description=vulnerability["description"],
-                vulner.type=vulnerability["type"],
-                vulner.access=vulnerability["access"],
-                vulner.impact=vulnerability["impact"],
-                vulner.references=vulnerability["references"],
-                vulner.cpe_list=vulnerability["cpe_list"],
-                vulner.component_versions=vulnerability["component_versions"],
-                vulner.component_versions_string=vulnerability["component_versions_string"],
-                vulner.source=vulnerability["source"],
-                vulner.cve_list=vulnerability["cve_list"],
-                vulner.cwe_list=vulnerability["cwe_list"],
-                vulner.capec_list=vulnerability["capec_list"],
-                vulner.cwe_id_list=vulnerability["cwe_id_list"],
+                vulner.component=vulnerability["component"]
+                vulner.parent_id=vulnerability["parent_id"]
+                vulner.published=vulnerability["published"]
+                vulner.modified=vulnerability["modified"]
+                vulner.cvss_time=vulnerability["cvss_time"]
+                vulner.cvss_score=vulnerability["cvss_score"]
+                vulner.cvss_rank=floor(vulnerability["cvss"])
+                vulner.cvss_vector=vulnerability["cvss_vector"]
+                vulner.description=vulnerability["description"]
+                vulner.type=vulnerability["type"]
+                vulner.access=vulnerability["access"]
+                vulner.impact=vulnerability["impact"]
+                vulner.references=vulnerability["references"]
+                vulner.cpe_list=vulnerability["cpe_list"]
+                vulner.component_versions=vulnerability["component_versions"]
+                vulner.component_versions_string=vulnerability["component_versions_string"]
+                vulner.source=vulnerability["source"]
+                vulner.cve_list=vulnerability["cve_list"]
+                vulner.cwe_list=vulnerability["cwe_list"]
+                vulner.capec_list=vulnerability["capec_list"]
+                vulner.cwe_id_list=vulnerability["cwe_id_list"]
                 vulner.modification=MODIFICATION_MODIFIED
                 vulner.save()
 
-    def create_or_update_vulnerability(self, vulnerability):
-        vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).first()
-        if vulner is None:
-            self.append_vilnerability_in_vulnerabilities_table(vulnerability)
-            return "created"
-        else:
-            if self.check_if_vulnerability_item_changed(vulner.data, vulnerability):
-                self.update_vulnerability_in_vulnerabilities_table(vulnerability)
-                return "updated"
-            return "skipped"
-
-    def stats(self):
-        return pack_answer(
-            status=TextMessages.ok.value,
-            message=TextMessages.ok.value,
-            vulner_cnt_before=self.count_vulnerabilities_table(),
-            vulner_cnt_after=self.count_vulnerabilities_table(),
-            new_cnt=self.count_vulnerabilities_new_marked(),
-            modified_cnt=self.count_vulnerabilities_modified_marked()
+    def check_if_this_vulner_already_in_vulnerability_table(self, new_vulnerability_from_cve):
+        # find vulner like cve in vulnerability table (by parent_id, for example CVE-2017-0001)
+        old_vulnerability = VULNERABILITIES.objects.filter(parent_id=new_vulnerability_from_cve["cve_id"]).first()
+        if old_vulnerability is None:
+            return "new"
+        result = self.check_if_vulnerability_item_changed__compare_by_json_content(
+            old_vulnerability.data,
+            new_vulnerability_from_cve
         )
+        if result:
+            return "modified"
+        return "skipped"
 
-    def update_vulnerabilities_from_cve(self, vulnerabilities):
-        for vulnerability in vulnerabilities:
-            print_debug("processing VULNER: {}".format(vulnerability.data["vulnerability_id"]))
-            self.create_or_update_vulnerability(vulnerability.data)
+    def update_vulnerabilities_from_cve_by_id(self, cve_ids):
+        for cve_id in cve_ids:
+            vulnerability_cve = self.cve_controller.get_one_cve_by_id(cve_id)
+            # Check if this vulnerability already in VULNERABILITIES table: new, modified, skipped
+            result = self.check_if_this_vulner_already_in_vulnerability_table
+            # resolve
+            if result == "new":
+                # TODO: reformat vulner
+                # Generate our special ID
+                generated_vulnerability_id = generate_id(original_id=vulnerability_cve.cve_id, source='cve')
+
+                reformatted_vulnerability = None # !!!
+                self.create_vulner_in_vulnerability_table__from_json(reformatted_vulnerability)
+            elif result == "modified":
+                # TODO: reformat vulner
+                reformatted_vulnerability = None # !!!
+                self.update_vulner_in_vulnerability_table__from_json(reformatted_vulnerability)
+            else:
+                pass
 
     def update(self):
-        cve_controller = CVEController()
-        result = self.update_vulnerabilities_from_cve(cve_controller.get_vulnerability_cve_new())
-        result = self.update_vulnerabilities_from_cve(cve_controller.get_vulnerability_cve_modified())
+        # for test
+
+        # mark one vulner as "new"
+
+        # # #
+        # process CVE items, marked as "new"
+        cve_new_ids = self.cve_controller.get_vulnerability_cve_new_ids()
+        result = self.update_vulnerabilities_from_cve_by_id(cve_new_ids)
+        cve_new_ids = []
+
+        # process CVE items, marked as "modified"
+        # cve_modified_ids = CVEController.get_vulnerability_cve_modified_ids()
+        # result = self.update_vulnerabilities_from_cve_by_id(cve_modified_ids)
+        # cve_modified_ids = []

@@ -65,7 +65,7 @@ class NPMController(object):
 
     @staticmethod
     def clear_vulnerability_npm_all_marks():
-        entries = VULNERABILITY_NPM.objects.select_for_update().all().defer("modification")
+        entries = VULNERABILITY_NPM.objects.select_for_update().all().only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -73,7 +73,7 @@ class NPMController(object):
 
     @staticmethod
     def clear_vulnerability_npm_new_marks():
-        entries = VULNERABILITY_NPM.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        entries = VULNERABILITY_NPM.objects.select_for_update().filter(modification=MODIFICATION_NEW).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -81,7 +81,7 @@ class NPMController(object):
 
     @staticmethod
     def clear_vulnerability_npm_modified_marks():
-        entries = VULNERABILITY_NPM.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        entries = VULNERABILITY_NPM.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -136,14 +136,14 @@ class NPMController(object):
 
     @staticmethod
     def mark_npm_in_vulnerability_npm_table_as_new(npm):
-        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).defer("modification").first()
+        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_NEW
             vulner.save()
 
     @staticmethod
     def mark_npm_in_vulnerability_npm_table_as_modified(npm):
-        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).defer("modification").first()
+        vulner = VULNERABILITY_NPM.objects.filter(npm_id=npm["npm_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_MODIFIED
             vulner.save()

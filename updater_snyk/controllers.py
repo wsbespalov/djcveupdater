@@ -74,7 +74,7 @@ class SNYKController(object):
 
     @staticmethod
     def clear_vulnerability_snyk_all_marks():
-        entries = VULNERABILITY_SNYK.objects.select_for_update().all().defer("modification")
+        entries = VULNERABILITY_SNYK.objects.select_for_update().all().only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -82,7 +82,7 @@ class SNYKController(object):
 
     @staticmethod
     def clear_vulnerability_snyk_new_marks():
-        entries = VULNERABILITY_SNYK.objects.select_for_update().filter(modification=MODIFICATION_NEW).defer("modification")
+        entries = VULNERABILITY_SNYK.objects.select_for_update().filter(modification=MODIFICATION_NEW).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -90,7 +90,7 @@ class SNYKController(object):
 
     @staticmethod
     def clear_vulnerability_snyk_modified_marks():
-        entries = VULNERABILITY_SNYK.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).defer("modification")
+        entries = VULNERABILITY_SNYK.objects.select_for_update().filter(modification=MODIFICATION_MODIFIED).only("modification")
         with transaction.atomic():
             for entry in entries:
                 entry.modification = MODIFICATION_CLEAR
@@ -142,14 +142,14 @@ class SNYKController(object):
 
     @staticmethod
     def mark_snyk_in_vulnerability_snyk_table_as_new(snyk):
-        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).defer("modification").first()
+        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_NEW
             vulner.save()
 
     @staticmethod
     def mark_snyk_in_vulnerability_snyk_table_as_modified(snyk):
-        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).defer("modification").first()
+        vulner = VULNERABILITY_SNYK.objects.filter(snyk_id=snyk["snyk_id"]).only("modification").first()
         if vulner is not None:
             vulner.modification = MODIFICATION_MODIFIED
             vulner.save()

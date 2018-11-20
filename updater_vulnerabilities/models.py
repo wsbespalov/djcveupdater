@@ -83,6 +83,7 @@ default_vulnerability_id_separator = ":"
 class VULNERABILITIES(models.Model):
     id = models.BigAutoField(primary_key=True)
     vulnerability_id = models.TextField(default=default_vulnerability_id_undefined)
+    parent_id = models.TextField(default="")
     component = models.TextField(default=undefined)
     created = models.DateTimeField(default=timezone.now)
     published = models.DateTimeField(default=timezone.now)
@@ -99,7 +100,7 @@ class VULNERABILITIES(models.Model):
     author = models.TextField(default=undefined)
     type = models.TextField(default=undefined)
     source = models.TextField(default=undefined)
-    vulnerabe_versions = ArrayField(models.TextField(blank=True), default=list)
+    vulnerable_versions = ArrayField(models.TextField(blank=True), default=list)
     patched_versions = ArrayField(models.TextField(blank=True), default=list)
     access = JSONField(default=default_access)
     impact = JSONField(default=default_impact)
@@ -130,6 +131,7 @@ class VULNERABILITIES(models.Model):
         data["_id"] = self.id
         data["__v"] = 0
         data["vulnerability_id"] = self.vulnerability_id
+        data["parent_id"] = self.parent_id
         data["component"] = self.component
         data["Created"] = self.created
         data["Published"] = self.published
@@ -152,7 +154,7 @@ class VULNERABILITIES(models.Model):
         data["author"] = self.author
         data["type"] = self.type
         data["source"] = self.source
-        data["vulnerable_versions"] = self.vulnerabe_versions
+        data["vulnerable_versions"] = self.vulnerable_versions
         data["patched_versions"] = self.patched_versions
         data["access"] = self.access
         data["impact"] = self.impact
@@ -167,6 +169,34 @@ class VULNERABILITIES(models.Model):
         ordering = ["vulnerability_id", "modification"]
         verbose_name = "VULNERABILITIES"
         verbose_name_plural = "VULNERABILITIES"
+
+
+class SPID(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    spid = models.TextField(default="")
+    sync = models.DateTimeField(default=timezone.now)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return "{}".format(self.spid)
+
+    def __unicode__(self):
+        return "SPID: {}".format(self.spid)
+            
+    class Meta:
+        ordering = ["sync"]
+        verbose_name = "SPID"
+        verbose_name_plural = "SPIDS"
+
+    @property
+    def data(self):
+        data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
+        data["spid"] = self.spid
+        data["sync"] = self.sync
+        return data
+
 
 a = """
 from updater_vulnerabilities.models import VULNERABILITIES as V
