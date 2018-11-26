@@ -11,6 +11,7 @@ from django.db import transaction
 from .models import STATUS_VULNERABILITIES
 from .models import VULNERABILITIES
 
+
 from .text_messages import TextMessages
 
 from .configurations import VULNERABILITIESConfig
@@ -187,6 +188,11 @@ class VULNERABILITIESController():
         )
 
     @staticmethod
+    def create_cve_source(cve_id):
+        return 'https://cve.mitre.org/cgi-bin/cvename.cgi?name=' + cve_id
+
+
+    @staticmethod
     def check_if_vulnerability_item_changed__compare_by_json_content(old, new):
         if old["component"] != new["component"] or \
             old["modified"] != new["modified"] or \
@@ -212,6 +218,7 @@ class VULNERABILITIESController():
         return False
 
     def create_vulner_in_vulnerability_table__from_json(self, vulnerability):
+        uid = -1
         vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).first()
         if vulner is None:
             vulner = VULNERABILITIES(
@@ -240,6 +247,9 @@ class VULNERABILITIESController():
                 modification=MODIFICATION_NEW
             )
             vulner.save()
+            uid = vulner.id
+        return uid
+        
 
     def update_vulner_in_vulnerability_table__from_json(self, vulnerability):
         vulner = VULNERABILITIES.objects.filter(vulnerability_id=vulnerability["vulnerability_id"]).first()
@@ -268,38 +278,60 @@ class VULNERABILITIESController():
                 vulner.modification=MODIFICATION_MODIFIED
                 vulner.save()
 
-    def check_if_this_vulner_already_in_vulnerability_table(self, new_vulnerability_from_cve):
-        # find vulner like cve in vulnerability table (by parent_id, for example CVE-2017-0001)
-        old_vulnerability = VULNERABILITIES.objects.filter(parent_id=new_vulnerability_from_cve["cve_id"]).first()
-        if old_vulnerability is None:
-            return "new"
-        result = self.check_if_vulnerability_item_changed__compare_by_json_content(
-            old_vulnerability.data,
-            new_vulnerability_from_cve
-        )
-        if result:
-            return "modified"
-        return "skipped"
+
+    def create_vulnerability_cv_and_relations_by_componentversions(uid):
+        pass
+
 
     def update_vulnerabilities_from_cve_by_id(self, cve_ids):
         for cve_id in cve_ids:
-            vulnerability_cve = self.cve_controller.get_one_cve_by_id(cve_id)
             # Check if this vulnerability already in VULNERABILITIES table: new, modified, skipped
-            result = self.check_if_this_vulner_already_in_vulnerability_table
-            # resolve
-            if result == "new":
-                # TODO: reformat vulner
-                # Generate our special ID
-                generated_vulnerability_id = generate_id(original_id=vulnerability_cve.cve_id, source='cve')
+            # Check with list of @filter by parent_id, no @first
 
-                reformatted_vulnerability = None # !!!
-                self.create_vulner_in_vulnerability_table__from_json(reformatted_vulnerability)
-            elif result == "modified":
-                # TODO: reformat vulner
-                reformatted_vulnerability = None # !!!
-                self.update_vulner_in_vulnerability_table__from_json(reformatted_vulnerability)
+            print_debug("process CVE with ID: {}".format(cve_id))
+
+            # Get all Vulners from VULNERABILITY table with parent_id == cve_id
+
+            vulner_with_cve_id_as_parent = VULNERABILITIES.objects.filter(parent_id=cve_id).first()
+            
+            vulnerability_cve = self.cve_controller.get_one_cve_by_cve_id(cve_id) # -> return Database object
+            
+            if vulner_with_cve_id_as_parent is not None:
+                # this is new vulner
+                print_debug("this is a new Vulner")
+                generated_vulnerability_id = generate_id(original_id=vulnerability_cve.cve_id, source='cve')
+                cve_source = self.create_cve_source(cve_id)
+                filtered_and_extended_cve = vulnerability_cve.data
+                filtered_and_extended_cve["parent_id"] = cve_id
+                filtered_and_extended_cve["type"] = "CVE"
+                filtered_and_extended_cve["cvss_score"] = vulnerability_cve.cvss
+                filtered_and_extended_cve["cvss_vector"] = vulnerability_cve.vector_string
+                filtered_and_extended_cve["vulnerability_id"] = generated_vulnerability_id
+                uid = self.create_vulner_in_vulnerability_table__from_json(filtered_and_extended_cve)
+                self.create_vulnerability_cv_and_relations_by_componentversions(uid)
             else:
+                # check, which vulners changed
+                print_debug("this is a NOT new Vulner, so check if it was changed in source")
+                result = self.check_if_vulnerability_item_changed__compare_by_json_content(vulner_with_cve_id_as_parent, vulnerability_cve)
+                
                 pass
+
+
+
+            # # resolve
+            # if result == "new":
+            #     # TODO: reformat vulner
+            #     # Generate our special ID
+                
+
+            #     reformatted_vulnerability = None # !!!
+            #     self.create_vulner_in_vulnerability_table__from_json(reformatted_vulnerability)
+            # elif result == "modified":
+            #     # TODO: reformat vulner
+            #     reformatted_vulnerability = None # !!!
+            #     self.update_vulner_in_vulnerability_table__from_json(reformatted_vulnerability)
+            # else:
+            #     pass
 
     def update(self):
         # for test
@@ -316,3 +348,6 @@ class VULNERABILITIESController():
         # cve_modified_ids = CVEController.get_vulnerability_cve_modified_ids()
         # result = self.update_vulnerabilities_from_cve_by_id(cve_modified_ids)
         # cve_modified_ids = []
+
+        print_debug("complete...")
+        ask_input()

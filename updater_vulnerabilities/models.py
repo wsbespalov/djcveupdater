@@ -198,6 +198,35 @@ class SPID(models.Model):
         return data
 
 
+class CV(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    componentversion = models.TextField(default="")
+    vulnerability = models.ForeignKey(VULNERABILITIES, on_delete=models.CASCADE)
+    vulnerability_id = models.TextField(default="")
+    created = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return "{}".format(self.componentversion)
+
+    def __unicode__(self):
+        return "CV: {}".format(self.componentversion)
+            
+    class Meta:
+        ordering = ["created"]
+        verbose_name = "CV"
+        verbose_name_plural = "CVS"
+
+    @property
+    def data(self):
+        data = json.loads(serializers.serialize("json", [self, ]))[0]["fields"]
+        data["id"] = self.id
+        data["componentversion"] = self.componentversion
+        data["vulnerability"] = self.vulnerability
+        data["vulnerability_id"] = self.vulnerability_id
+        data["created"] = self.created
+
+
+
 a = """
 from updater_vulnerabilities.models import VULNERABILITIES as V
 v = V.objects.create(vulnerability_id="SPID-1")

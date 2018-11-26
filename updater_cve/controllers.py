@@ -120,7 +120,8 @@ class CVEController():
 
     @staticmethod
     def get_vulnerability_cve_new_ids():
-        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_NEW).only("cve_id")
+        db_result = VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_NEW).values("cve_id").distinct()
+        return list(map(lambda x: x["cve_id"], db_result))
 
     @staticmethod
     def get_vulnerability_cve_modified():
@@ -128,7 +129,8 @@ class CVEController():
 
     @staticmethod
     def get_vulnerability_cve_modified_ids():
-        return VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_MODIFIED).only("cve_id")
+        db_result = VULNERABILITY_CVE.objects.filter(modification=MODIFICATION_NEW).values("cve_id").distinct()
+        return list(map(lambda x: x["cve_id"], db_result))
 
     @staticmethod
     def append_cve_in_vulnerability_cve_table(cve):

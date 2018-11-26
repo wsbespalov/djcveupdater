@@ -63,3 +63,9 @@ urlpatterns += [
 urlpatterns += [
     path('cve/', include('updater_cve.urls'))
 ]
+
+# Vulnerabilities
+
+urlpatterns += [
+    path('vulnerabilities/', include('updater_vulnerabilities.urls'))
+]
